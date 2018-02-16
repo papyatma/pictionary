@@ -163,6 +163,7 @@ let dessinPoint = {
   type: ""
 };
 
+let socket;
 
 (function init() {
   canvas       = document.querySelector('#canvasPictionary');
@@ -177,11 +178,8 @@ let dessinPoint = {
 
   context.save();
   contextLigne.save();
-
   dessinePlateau();
-
   demarrerCompteurTemps();
-
 })();
 
 function demarrerCompteurTemps() {
@@ -225,9 +223,9 @@ function dessinePlateau() {
   dessineUnRectanglePlein(1, 1, canvas.width, canvas.height, couleurFond, couleurFond, 0);
   dessineStatics();
   if (!ecoutePosee) {
+    ecouterWebSocket();
     ecouterSouris();
     ecouterClavier();
-    ecouterWebSocket();
     ecoutePosee = true;
   }
 }
@@ -625,72 +623,105 @@ function dessineBoutonActeur(couleurBord) {
                           couleurBord,
                           3);
 
-      context.font = "bold 20px Cambria";
-      context.textAlign = 'center';
-      context.textBaseline = 'middle';
-
-      context.fillStyle = "grey";
-      context.fillText(typeDeJoueur, (boutonActeurGauche + boutonActeurDroite) / 2, (boutonActeurHaut + boutonActeurBas) / 2);
-
-      context.restore();
-}
-
-function dessineBoutonRejouer(couleurBord) {
-
-  if (!couleurBord) {
-    couleurBord = "black";
-  }
-
-  color       = "Gainsboro";
-  boutonRejouerGauche = canvas.width - espaceDroite;
-  boutonRejouerDroite = boutonRejouerGauche + espaceDroite;
-  boutonRejouerHaut   = espaceHaut + espaceTitre + 30 + 20;
-  boutonRejouerBas    = boutonRejouerHaut + 30;
-  dessineUnRectanglePlein(boutonRejouerGauche,
-                          boutonRejouerHaut,
-                          espaceDroite,
-                          30,
-                          color,
-                          couleurBord,
-                          3);
-
-      context.font = "bold 20px Cambria";
-      context.textAlign = 'center';
-      context.textBaseline = 'middle';
-
-      context.fillStyle = "grey";
-      context.fillText("rejouer dessin", (boutonRejouerGauche + boutonRejouerDroite) / 2, (boutonRejouerHaut + boutonRejouerBas) / 2);
-
-      context.restore();
-}
-
-function dessineBoutonReinit(couleurBord) {
-
-  if (!couleurBord) {
-    couleurBord = "black";
-  }
-
-  color       = "Gainsboro";
-  boutonReinitGauche = canvas.width - espaceDroite;
-  boutonReinitDroite = boutonRejouerGauche + espaceDroite;
-  boutonReinitHaut   = espaceHaut + espaceTitre + 100;
-  boutonReinitBas    = boutonReinitHaut + 30;
-  dessineUnRectanglePlein(boutonReinitGauche,
-                          boutonReinitHaut,
-                          espaceDroite,
-                          30,
-                          color,
-                          couleurBord,
-                          3);
-
   context.font = "bold 20px Cambria";
   context.textAlign = 'center';
   context.textBaseline = 'middle';
 
   context.fillStyle = "grey";
-  context.fillText("Nouveau dessin", (boutonReinitGauche + boutonReinitDroite) / 2, (boutonReinitHaut + boutonReinitBas) / 2);
+  context.fillText(typeDeJoueur, (boutonActeurGauche + boutonActeurDroite) / 2, (boutonActeurHaut + boutonActeurBas) / 2);
 
   context.restore();
+}
+
+function dessineBoutonRejouer(couleurBord) {
+
+  color       = couleurFond;
+  boutonRejouerGauche = canvas.width - espaceDroite;
+  boutonRejouerDroite = boutonRejouerGauche + espaceDroite;
+  boutonRejouerHaut   = espaceHaut + espaceTitre + 30 + 20;
+  boutonRejouerBas    = boutonRejouerHaut + 30;
+  dessineUnRectanglePlein(boutonRejouerGauche + 4,
+                          boutonRejouerHaut,
+                          espaceDroite - 8,
+                          30,
+                          color,
+                          color,
+                          3);
+
+
+  if (typeDeJoueur === "Observateur") {
+
+    if (!couleurBord) {
+      couleurBord = "black";
+    }
+
+    color       = "Gainsboro";
+    boutonRejouerGauche = canvas.width - espaceDroite;
+    boutonRejouerDroite = boutonRejouerGauche + espaceDroite;
+    boutonRejouerHaut   = espaceHaut + espaceTitre + 30 + 20;
+    boutonRejouerBas    = boutonRejouerHaut + 30;
+    dessineUnRectanglePlein(boutonRejouerGauche + 4,
+                            boutonRejouerHaut,
+                            espaceDroite - 8,
+                            30,
+                            color,
+                            couleurBord,
+                            3);
+
+    context.font = "bold 20px Cambria";
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+
+    context.fillStyle = "grey";
+    context.fillText("rejouer dessin", (boutonRejouerGauche + boutonRejouerDroite) / 2, (boutonRejouerHaut + boutonRejouerBas) / 2);
+
+    context.restore();
+  }
+}
+
+function dessineBoutonReinit(couleurBord) {
+
+  color       = couleurFond;
+    boutonReinitGauche = canvas.width - espaceDroite;
+  boutonReinitDroite = boutonRejouerGauche + espaceDroite;
+  boutonReinitHaut   = espaceHaut + espaceTitre + 100;
+  boutonReinitBas    = boutonReinitHaut + 30;
+  dessineUnRectanglePlein(boutonReinitGauche + 4,
+                          boutonReinitHaut,
+                          espaceDroite - 8,
+                          30,
+                          color,
+                          color,
+                          3);
+
+  if (typeDeJoueur === "Dessinateur") {
+
+    if (!couleurBord) {
+      couleurBord = "black";
+    }
+
+    color       = "Gainsboro";
+    boutonReinitGauche = canvas.width - espaceDroite;
+    boutonReinitDroite = boutonRejouerGauche + espaceDroite;
+    boutonReinitHaut   = espaceHaut + espaceTitre + 100;
+    boutonReinitBas    = boutonReinitHaut + 30;
+    dessineUnRectanglePlein(boutonReinitGauche + 4,
+                            boutonReinitHaut,
+                            espaceDroite - 8,
+                            30,
+                            color,
+                            couleurBord,
+                            3);
+
+    context.font = "bold 20px Cambria";
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+
+    context.fillStyle = "grey";
+    context.fillText("Nouveau dessin", (boutonReinitGauche + boutonReinitDroite) / 2, (boutonReinitHaut + boutonReinitBas) / 2);
+
+    context.restore();
+  }
 }
 
 function dessinerTempsRestant() {
@@ -883,9 +914,7 @@ function ecouterSouris() {
 
            let savePoint = new Point(dessinPoint.x, dessinPoint.y, dessinPoint.taille, dessinPoint.couleur, dessinPoint.type);
            savePoint.dessine(contextLigne);
-
-           dessin.push(savePoint);
-
+           envoiPoint(savePoint);
         }
       }
       if ((mousePos.x >= couleurNoirGauche && mousePos.x <= couleurNoirDroite)
@@ -1014,7 +1043,7 @@ function ecouterSouris() {
           //  dessineLigne(dessinPoint.x, dessinPoint.y, dessinPoint.taille, dessinPoint.couleur, dessinPoint.type);
            let savePoint = new Point(dessinPoint.x, dessinPoint.y, dessinPoint.taille, dessinPoint.couleur, dessinPoint.type);
            savePoint.dessine(contextLigne);
-           dessin.push(savePoint);
+           envoiPoint(savePoint);
         }
       }
       if ((mousePos.x >= boutonReinitGauche && mousePos.x <= boutonReinitDroite)
@@ -1072,7 +1101,7 @@ function ecouterSouris() {
         let savePoint = new Point(dessinPoint.x, dessinPoint.y, dessinPoint.taille, dessinPoint.couleur, dessinPoint.type);
         savePoint.dessine(contextLigne);
 
-        dessin.push(savePoint);
+        envoiPoint(savePoint);
       }
 
       if ((mousePos.x >= couleurNoirGauche && mousePos.x <= couleurNoirDroite)
@@ -1171,9 +1200,10 @@ function ecouterSouris() {
         typeDeJoueur = "Dessinateur";
         viderReponse();
       }
+      dessineBoutonRejouer();
+      dessineBoutonReinit();
       dessineBoutonActeur();
     }
-
   });
 }
 
@@ -1205,12 +1235,33 @@ function ecouterClavier() {
           dessineChampReponse();
         }
       }
+      if (key === VK_ENTER) { // Enter
+        if (reponse.length > 0) {
+          if (reponse == "MAISON") {
+            arreterCompteurTemps();
+            console.log("Dessinateur a Gagné");
+            // dessiner DESSINATEUR A GAGNE
+            context.font = "bold 80px Cambria";
+            context.textAlign = 'center';
+            context.fillStyle = "gold";
+            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2);
+            typeDeJoueur = "Terminé";
+            context.restore();
+          }
+        }
+      }
     }
   }
 }
 
 function ecouterWebSocket() {
+  let exampleSocket = new WebSocket("ws://localhost:9000");
 
+  socket = io();
+  socket.on('Point', function(point){
+    console.log(event.data);
+    console.log("point", point);
+  });
 }
 
 
@@ -1249,4 +1300,10 @@ function redessineDessin() {
     //dessineLigne(dessinPoint.x, dessinPoint.y, dessinPoint.taille, dessinPoint.couleur, dessinPoint.type);
     varTimeOut = setTimeout(redessineDessin, 0);
   }
+}
+
+
+function envoiPoint(Point) {
+  dessin.push(Point);
+  socket.emit('Point', Point);
 }

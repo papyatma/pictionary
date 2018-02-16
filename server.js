@@ -6,32 +6,40 @@
 // | nodemon server.js      |
 // +------------------------+
 
-const PORT = 9000;
+// modules
 const express = require('express');
-const WebSocketServer = require("ws").Server;
-ws = new WebSocketServer( { port: 9000 } );
+const bodyParser = require('body-parser');
+
+const PORT = 9000;
 
 const app = express();
 
-app.use('/',express.static(__dirname + '/app'));
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 
-app.listen(PORT);
+app.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', "*");
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    next();
+});
 
-console.log(`-----------------------------
-| The root folder is: '${__dirname}/app'
-| You can access the application at: http://localhost:${PORT}
-------------------------------------------`);
+app.use('/', express.static(__dirname + '/app'));
 
-ws.on('connection', function (ws) {
-  console.log("Browser connected online...")
+app.use(bodyParser.urlencoded({ extended: true }));
 
-  ws.on("message", function (str) {
-    var ob = JSON.parse(str);
-    let data = JSON.stringify(ob);
-    ws.send(data);
-  })
+app.get('/', function(req, res){
+  console.log("server OK");
+});
 
-  ws.on("close", function() {
-    console.log("Browser gone.")
-  })
+http.listen(PORT, function(){
+  console.log('listening on :' + PORT);
+});
+
+io.on('connection', function(socket) {
+  socket.on('Point', function(point) {
+    console.log('message recu au serveur: ', point);
+    io.send(point);
+  });
 });

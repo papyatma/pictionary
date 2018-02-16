@@ -56,7 +56,6 @@ class Point {
   }
 
   demarreLaLigne() {
-    console.log("demarreLaLigne(" + this.x + ", " + this.y + ", " + this.taille + ", " + this.couleur + ")")
     contextLigne.beginPath();
     contextLigne.lineWidth   = this.taille;
     contextLigne.strokeStyle = this.couleur;
@@ -66,7 +65,6 @@ class Point {
   }
 
   continuLaLigne() {
-    console.log("continuLaLigne(" + this.x + ", " + this.y + ", " + this.taille + ", " + this.couleur + ")")
     contextLigne.lineWidth   = this.taille;
     contextLigne.strokeStyle = this.couleur;
     contextLigne.lineTo(this.x, this.y);
@@ -74,7 +72,6 @@ class Point {
   }
 
   finiLaLigne() {
-    console.log("   finiLaLigne")
     contextLigne.closePath();
     contextLigne.restore();
   }
