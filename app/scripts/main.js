@@ -635,31 +635,26 @@ function dessineBoutonActeur(couleurBord) {
 
 function dessineBoutonRejouer(couleurBord) {
 
-  color       = couleurFond;
-  boutonRejouerGauche = canvas.width - espaceDroite;
-  boutonRejouerDroite = boutonRejouerGauche + espaceDroite;
-  boutonRejouerHaut   = espaceHaut + espaceTitre + 30 + 20;
-  boutonRejouerBas    = boutonRejouerHaut + 30;
-  dessineUnRectanglePlein(boutonRejouerGauche + 4,
-                          boutonRejouerHaut,
-                          espaceDroite - 8,
-                          30,
-                          color,
-                          color,
-                          3);
-
-
   if (typeDeJoueur === "Observateur") {
+
+    color       = couleurFond;
+    boutonRejouerGauche = canvas.width - espaceDroite;
+    boutonRejouerDroite = boutonRejouerGauche + espaceDroite;
+    boutonRejouerHaut   = espaceHaut + espaceTitre + 30 + 20;
+    boutonRejouerBas    = boutonRejouerHaut + 30;
+    dessineUnRectanglePlein(boutonRejouerGauche + 4,
+                            boutonRejouerHaut,
+                            espaceDroite - 8,
+                            30,
+                            color,
+                            color,
+                            3);
 
     if (!couleurBord) {
       couleurBord = "black";
     }
 
     color       = "Gainsboro";
-    boutonRejouerGauche = canvas.width - espaceDroite;
-    boutonRejouerDroite = boutonRejouerGauche + espaceDroite;
-    boutonRejouerHaut   = espaceHaut + espaceTitre + 30 + 20;
-    boutonRejouerBas    = boutonRejouerHaut + 30;
     dessineUnRectanglePlein(boutonRejouerGauche + 4,
                             boutonRejouerHaut,
                             espaceDroite - 8,
@@ -673,7 +668,7 @@ function dessineBoutonRejouer(couleurBord) {
     context.textBaseline = 'middle';
 
     context.fillStyle = "grey";
-    context.fillText("rejouer dessin", (boutonRejouerGauche + boutonRejouerDroite) / 2, (boutonRejouerHaut + boutonRejouerBas) / 2);
+    context.fillText("Rejouer dessin", (boutonRejouerGauche + boutonRejouerDroite) / 2, (boutonRejouerHaut + boutonRejouerBas) / 2);
 
     context.restore();
   }
@@ -681,30 +676,26 @@ function dessineBoutonRejouer(couleurBord) {
 
 function dessineBoutonReinit(couleurBord) {
 
-  color       = couleurFond;
-    boutonReinitGauche = canvas.width - espaceDroite;
-  boutonReinitDroite = boutonRejouerGauche + espaceDroite;
-  boutonReinitHaut   = espaceHaut + espaceTitre + 100;
-  boutonReinitBas    = boutonReinitHaut + 30;
-  dessineUnRectanglePlein(boutonReinitGauche + 4,
-                          boutonReinitHaut,
-                          espaceDroite - 8,
-                          30,
-                          color,
-                          color,
-                          3);
-
   if (typeDeJoueur === "Dessinateur") {
+
+    color       = couleurFond;
+    boutonReinitGauche = canvas.width - espaceDroite;
+    boutonReinitDroite = boutonReinitGauche + espaceDroite;
+    boutonReinitHaut   = espaceHaut + espaceTitre + 30+20;
+    boutonReinitBas    = boutonReinitHaut + 30;
+    dessineUnRectanglePlein(boutonReinitGauche + 4,
+                            boutonReinitHaut,
+                            espaceDroite - 8,
+                            30,
+                            color,
+                            color,
+                            3);
 
     if (!couleurBord) {
       couleurBord = "black";
     }
 
     color       = "Gainsboro";
-    boutonReinitGauche = canvas.width - espaceDroite;
-    boutonReinitDroite = boutonRejouerGauche + espaceDroite;
-    boutonReinitHaut   = espaceHaut + espaceTitre + 100;
-    boutonReinitBas    = boutonReinitHaut + 30;
     dessineUnRectanglePlein(boutonReinitGauche + 4,
                             boutonReinitHaut,
                             espaceDroite - 8,
