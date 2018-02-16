@@ -5,4 +5,10 @@ h1 {
 
 canvas {
 	border: 1px solid #000;
+  background-color: black;
+}
+
+#divCanvas {
+  display: flex;
+  justify-content: center;
 }
