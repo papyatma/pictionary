@@ -13,7 +13,7 @@ let typeDeJoueur = "Dessinateur";
 let couleurFond = "FloralWhite";
 
 let intervalTemps;
-let tempsRestantMax = 99;
+let tempsRestantMax = 30;
 let tempsRestant;
 let couleurTempsRestant      = "#000000";
 let couleurTempsRestantRouge = 0xFF;
@@ -61,6 +61,10 @@ let dessinDroite;
 
 let tailleDessinHeight;
 let tailleDessinWidth;
+
+let etatBoutonPoint;
+let boutonPointUp   = false;
+let boutonPointDown = true;
 
 let taillePointBouton;
 
@@ -170,6 +174,7 @@ let socket;
   context      = canvas.getContext('2d');
   contextLigne = canvas.getContext('2d');
 
+
   couleurTempsRestantRouge = 0;    // (0xFF)
   couleurTempsRestantVert  = 255;
 
@@ -200,7 +205,17 @@ function demarrerCompteurTemps() {
       // dessiner DESSINATEUR A GAGNE
       context.font = "bold 100px Cambria";
       context.textAlign = 'center';
-
+      context.fillStyle = "black";
+      context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 + 4, (dessinBas + dessinHaut) / 2);
+      context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 - 4, (dessinBas + dessinHaut) / 2);
+      context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2 + 4);
+      context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2 - 4);
+      context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 + 4, (dessinBas + dessinHaut) / 2 + 4);
+      context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 - 4, (dessinBas + dessinHaut) / 2 - 4);
+      context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 - 4, (dessinBas + dessinHaut) / 2 + 4);
+      context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 + 4, (dessinBas + dessinHaut) / 2 - 4);
+      context.font = "bold 100px Cambria";
+      context.textAlign = 'center';
       context.fillStyle = "gold";
       context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2);
       typeDeJoueur = "Terminé";
@@ -234,10 +249,10 @@ function dessineStatics() {
   dessineTitre();
   dessineAutour();
   dessinePlancheADessin("white");
+  calculerBoutons();
   dessineBoutonsCouleur();
   dessineBoutonNoir("gold");
   dessineBoutonsPoint();
-  dessineBoutonPoint2("gold");
 }
 
 
@@ -251,24 +266,35 @@ function dessineTitre(couleurDebut, couleurMilieu, couleurFin) {
   if (!couleurFin) {
     couleurFin = "GreenYellow";
   }
-    context.font = "bold 60px Cambria";
-    context.textAlign = 'center';
+  context.font = "bold 60px Cambria";
+  context.textAlign = 'center';
 
-    tailleTitre = Math.trunc(context.measureText("Pictionary").width);
-    titreHaut   = 16;
-    titreBas    = 60;
-    titreGauche = (canvas.width - tailleTitre) / 2;
-    titreDroite = (canvas.width + tailleTitre) / 2;
+  tailleTitre = Math.trunc(context.measureText("Pictionary").width);
+  titreHaut   = 16;
+  titreBas    = 60;
+  titreGauche = (canvas.width - tailleTitre) / 2;
+  titreDroite = (canvas.width + tailleTitre) / 2;
 
-    let gradient = context.createLinearGradient(titreGauche, 0, titreDroite, 0);
-    gradient.addColorStop(0, couleurDebut);
-    gradient.addColorStop(0.5, couleurMilieu);
-    gradient.addColorStop(1, couleurFin);
+  let gradient = context.createLinearGradient(titreGauche, 0, titreDroite, 0);
+  gradient.addColorStop(0, couleurFin);
+  gradient.addColorStop(0.5, couleurMilieu);
+  gradient.addColorStop(1, couleurDebut);
 
-    context.fillStyle = gradient;
-    context.fillText("Pictionary", canvas.width / 2, 60);
-    context.restore();
-  }
+  context.fillStyle = gradient;
+  context.fillText("Pictionary", canvas.width / 2 - 2, 60);
+  context.fillText("Pictionary", canvas.width / 2 + 2, 60);
+  context.fillText("Pictionary", canvas.width / 2, 60 - 2);
+  context.fillText("Pictionary", canvas.width / 2, 60 + 2);
+
+  gradient = context.createLinearGradient(titreGauche, 0, titreDroite, 0);
+  gradient.addColorStop(0, couleurDebut);
+  gradient.addColorStop(0.5, couleurMilieu);
+  gradient.addColorStop(1, couleurFin);
+
+  context.fillStyle = gradient;
+  context.fillText("Pictionary", canvas.width / 2, 60);
+  context.restore();
+}
 
 function dessineAutour() {
 
@@ -287,30 +313,45 @@ function dessineAutour() {
                                       espaceGauche, espaceHaut + espaceTitre);
     context.restore(); // reinit le pinceau
 
-
     context.font = "bold 60px Cambria";
     context.textAlign = 'center';
-
-    context.fillStyle = "white";
+    context.fillStyle = "black";
     context.fillText("0", (espaceGauche) / 2, (espaceTitre + espaceHaut ) / 2 - 10);
 
     context.font = "bold 25px Cambria";
     context.textAlign = 'center';
-
+    context.fillStyle = "black";
+    context.fillText(nomJoueur1, (espaceGauche) / 2 + 1, espaceTitre + espaceHaut - 30);
+    context.fillText(nomJoueur1, (espaceGauche) / 2 - 1, espaceTitre + espaceHaut - 30);
+    context.fillText(nomJoueur1, (espaceGauche) / 2, espaceTitre + espaceHaut - 30 + 1);
+    context.fillText(nomJoueur1, (espaceGauche) / 2, espaceTitre + espaceHaut - 30 - 1);
+    context.fillText(nomJoueur1, (espaceGauche) / 2 + 1, espaceTitre + espaceHaut - 30 + 1);
+    context.fillText(nomJoueur1, (espaceGauche) / 2 + 1, espaceTitre + espaceHaut - 30 - 1);
+    context.fillText(nomJoueur1, (espaceGauche) / 2 - 1, espaceTitre + espaceHaut - 30 + 1);
+    context.fillText(nomJoueur1, (espaceGauche) / 2 - 1, espaceTitre + espaceHaut - 30 - 1);
     context.fillStyle = "gold";
     context.fillText(nomJoueur1, (espaceGauche) / 2, espaceTitre + espaceHaut - 30);
 
     context.font = "bold 60px Cambria";
     context.textAlign = 'center';
-
-    context.fillStyle = "white";
+    context.fillStyle = "black";
     context.fillText("0", canvas.width - (espaceDroite) / 2, (espaceTitre + espaceHaut) / 2 - 10);
 
     context.font = "bold 25px Cambria";
     context.textAlign = 'center';
-
+    context.fillStyle = "black";
+    context.fillText(nomJoueur2, canvas.width - (espaceDroite) / 2 + 1, espaceTitre + espaceHaut - 30);
+    context.fillText(nomJoueur2, canvas.width - (espaceDroite) / 2 - 1, espaceTitre + espaceHaut - 30);
+    context.fillText(nomJoueur2, canvas.width - (espaceDroite) / 2, espaceTitre + espaceHaut - 30 + 1);
+    context.fillText(nomJoueur2, canvas.width - (espaceDroite) / 2, espaceTitre + espaceHaut - 30 - 1);
+    context.fillText(nomJoueur2, canvas.width - (espaceDroite) / 2 + 1, espaceTitre + espaceHaut - 30 + 1);
+    context.fillText(nomJoueur2, canvas.width - (espaceDroite) / 2 + 1, espaceTitre + espaceHaut - 30 - 1);
+    context.fillText(nomJoueur2, canvas.width - (espaceDroite) / 2 - 1, espaceTitre + espaceHaut - 30 + 1);
+    context.fillText(nomJoueur2, canvas.width - (espaceDroite) / 2 - 1, espaceTitre + espaceHaut - 30 - 1);
     context.fillStyle = "gold";
     context.fillText(nomJoueur2, canvas.width - (espaceDroite) / 2, espaceTitre + espaceHaut - 30);
+
+    context.restore(); // reinit le pinceau
 
     dessineBoutonActeur();
     dessineBoutonRejouer();
@@ -337,8 +378,18 @@ function dessinePlancheADessin(couleur) {
   context.restore();
 }
 
-function dessineBoutonsCouleur() {
+function changeEtatBoutonPoint() {
+    etatBoutonPoint = !etatBoutonPoint;
+    console.log(etatBoutonPoint);
+}
 
+function calculerBoutons() {
+  calculerBoutonsCouleur();
+  etatBoutonPoint = boutonPointUp;
+  calculerBoutonsPoint();
+}
+
+function calculerBoutonsCouleur() {
   colorBorder = "black";
 
 // emplacement Boutons couleur
@@ -382,16 +433,9 @@ function dessineBoutonsCouleur() {
   couleurVertBas     = couleurVertHaut + 30;
   couleurVertGauche  = couleurJauneDroite + 10;
   couleurVertDroite  = couleurVertGauche + tailleCouleurBouton;
-
-  dessineBoutonNoir(colorBorder);
-  dessineBoutonBleu(colorBorder);
-  dessineBoutonRouge(colorBorder);
-  dessineBoutonJaune(colorBorder);
-  dessineBoutonVert(colorBorder);
 }
 
-function dessineBoutonsPoint() {
-
+function calculerBoutonsPoint() {
   colorBorder = "black";
 
 // emplacement Boutons taille
@@ -427,17 +471,89 @@ function dessineBoutonsPoint() {
   point10Bas    = point10Haut + taillePointBouton;
   point10Droite = point2Droite;
   point10Gauche = point2Gauche;
+}
 
+function dessineBoutonsCouleur() {
+  dessineBoutonNoir(colorBorder);
+  dessineBoutonBleu(colorBorder);
+  dessineBoutonRouge(colorBorder);
+  dessineBoutonJaune(colorBorder);
+  dessineBoutonVert(colorBorder);
+  switch (couleurCrayon){
+    case couleurNoir:
+      dessineBoutonNoir("gold");
+      break;
+    case couleurBleu :
+      dessineBoutonBleu("gold");
+      break;
+    case couleurRouge :
+      dessineBoutonRouge("gold");
+      break;
+    case couleurJaune :
+      dessineBoutonJaune("gold");
+      break;
+    case couleurVert :
+      dessineBoutonVert("gold");
+      break;
+  }
+}
 
+function dessineBoutonsPoint() {
   dessineBoutonPoint2("black");
   dessineBoutonPoint4("black");
   dessineBoutonPoint6("black");
   dessineBoutonPoint8("black");
   dessineBoutonPoint10("black");
+  switch (taillePointCrayon){
+    case point2:
+      dessineBoutonPoint2("gold");
+      break;
+    case point4 :
+      dessineBoutonPoint4("gold");
+      break;
+    case point6 :
+      dessineBoutonPoint6("gold");
+      break;
+    case point8 :
+      dessineBoutonPoint8("gold");
+      break;
+    case point10 :
+      dessineBoutonPoint10("gold");
+      break;
+  }
 }
 
+function effacerBoutons() {
+  effacerBoutonsCouleur();
+  effacerBoutonsPoint();
+}
+
+couleurNoirGauche,
+                        couleurNoirHaut
+function effacerBoutonsCouleur() {
+  dessineUnRectanglePlein(couleurNoirGauche,
+                          couleurNoirHaut,
+                          couleurVertDroite - couleurNoirGauche,
+                          30,
+                          couleurFond,
+                          couleurFond,
+                          3);
+}
+
+function effacerBoutonsPoint() {
+  dessineUnRectanglePlein(point2Gauche,
+                          point2Haut,
+                          taillePointBouton,
+                          point10Bas - point2Haut,
+                          couleurFond,
+                          couleurFond,
+                          3);
+}
+
+
+
 function dessineBoutonPoint2(colorBorder) {
-  color       = "white";
+  color = "white";
   dessineUnRectanglePlein(point2Gauche,
                           point2Haut,
                           taillePointBouton,
@@ -456,7 +572,7 @@ function dessineBoutonPoint2(colorBorder) {
 }
 
 function dessineBoutonPoint4(colorBorder) {
-  color       = "white";
+  color = "white";
   dessineUnRectanglePlein(point4Gauche,
                           point4Haut,
                           taillePointBouton,
@@ -475,7 +591,7 @@ function dessineBoutonPoint4(colorBorder) {
 }
 
 function dessineBoutonPoint6(colorBorder) {
-  color       = "white";
+  color = "white";
   dessineUnRectanglePlein(point6Gauche,
                           point6Haut,
                           taillePointBouton,
@@ -494,7 +610,7 @@ function dessineBoutonPoint6(colorBorder) {
 }
 
 function dessineBoutonPoint8(colorBorder) {
-  color       = "white";
+  color = "white";
   dessineUnRectanglePlein(point8Gauche,
                           point8Haut,
                           taillePointBouton,
@@ -513,7 +629,7 @@ function dessineBoutonPoint8(colorBorder) {
 }
 
 function dessineBoutonPoint10(colorBorder) {
-  color       = "white";
+  color = "white";
   dessineUnRectanglePlein(point10Gauche,
                           point10Haut,
                           taillePointBouton,
@@ -532,9 +648,7 @@ function dessineBoutonPoint10(colorBorder) {
 }
 
 function dessineBoutonNoir(colorBorder) {
-
-  color       = couleurNoir;
-
+  color = couleurNoir;
   dessineUnRectanglePlein(couleurNoirGauche,
                           couleurNoirHaut,
                           tailleCouleurBouton,
@@ -543,14 +657,12 @@ function dessineBoutonNoir(colorBorder) {
                           colorBorder,
                           3);
   context.restore();
-
 }
 
 
 function dessineBoutonBleu(colorBorder) {
 
-  color       = couleurBleu;
-
+  color = couleurBleu;
   dessineUnRectanglePlein(couleurBleuGauche,
                           couleurBleuHaut,
                           tailleCouleurBouton,
@@ -563,8 +675,7 @@ function dessineBoutonBleu(colorBorder) {
 
 function dessineBoutonRouge(colorBorder) {
 
-  color       = couleurRouge;
-
+  color = couleurRouge;
   dessineUnRectanglePlein(couleurRougeGauche,
                           couleurRougeHaut,
                           tailleCouleurBouton,
@@ -577,8 +688,7 @@ function dessineBoutonRouge(colorBorder) {
 
 function dessineBoutonJaune(colorBorder) {
 
-  color       = couleurJaune;
-
+  color = couleurJaune;
   dessineUnRectanglePlein(couleurJauneGauche,
                           couleurJauneHaut,
                           tailleCouleurBouton,
@@ -591,8 +701,7 @@ function dessineBoutonJaune(colorBorder) {
 
 function dessineBoutonVert(colorBorder) {
 
-  color       = couleurVert;
-
+  color = couleurVert;
   dessineUnRectanglePlein(couleurVertGauche,
                           couleurVertHaut,
                           tailleCouleurBouton,
@@ -610,7 +719,7 @@ function dessineBoutonActeur(couleurBord) {
     couleurBord = "black";
   }
 
-  color       = "Gainsboro";
+  color              = "Gainsboro";
   boutonActeurGauche = (canvas.width - espaceDroite) / 2;
   boutonActeurDroite = boutonActeurGauche + espaceDroite;
   boutonActeurHaut   = espaceTitre + 20;
@@ -623,11 +732,11 @@ function dessineBoutonActeur(couleurBord) {
                           couleurBord,
                           3);
 
-  context.font = "bold 20px Cambria";
-  context.textAlign = 'center';
+  context.font         = "bold 20px Cambria";
+  context.textAlign    = 'center';
   context.textBaseline = 'middle';
 
-  context.fillStyle = "grey";
+  context.fillStyle    = "grey";
   context.fillText(typeDeJoueur, (boutonActeurGauche + boutonActeurDroite) / 2, (boutonActeurHaut + boutonActeurBas) / 2);
 
   context.restore();
@@ -637,7 +746,7 @@ function dessineBoutonRejouer(couleurBord) {
 
   if (typeDeJoueur === "Observateur") {
 
-    color       = couleurFond;
+    color               = couleurFond;
     boutonRejouerGauche = canvas.width - espaceDroite;
     boutonRejouerDroite = boutonRejouerGauche + espaceDroite;
     boutonRejouerHaut   = espaceHaut + espaceTitre + 30 + 20;
@@ -654,7 +763,7 @@ function dessineBoutonRejouer(couleurBord) {
       couleurBord = "black";
     }
 
-    color       = "Gainsboro";
+    color = "Gainsboro";
     dessineUnRectanglePlein(boutonRejouerGauche + 4,
                             boutonRejouerHaut,
                             espaceDroite - 8,
@@ -663,11 +772,11 @@ function dessineBoutonRejouer(couleurBord) {
                             couleurBord,
                             3);
 
-    context.font = "bold 20px Cambria";
-    context.textAlign = 'center';
+    context.font         = "bold 20px Cambria";
+    context.textAlign    = 'center';
     context.textBaseline = 'middle';
 
-    context.fillStyle = "grey";
+    context.fillStyle    = "grey";
     context.fillText("Rejouer dessin", (boutonRejouerGauche + boutonRejouerDroite) / 2, (boutonRejouerHaut + boutonRejouerBas) / 2);
 
     context.restore();
@@ -678,7 +787,7 @@ function dessineBoutonReinit(couleurBord) {
 
   if (typeDeJoueur === "Dessinateur") {
 
-    color       = couleurFond;
+    color              = couleurFond;
     boutonReinitGauche = canvas.width - espaceDroite;
     boutonReinitDroite = boutonReinitGauche + espaceDroite;
     boutonReinitHaut   = espaceHaut + espaceTitre + 30+20;
@@ -695,7 +804,7 @@ function dessineBoutonReinit(couleurBord) {
       couleurBord = "black";
     }
 
-    color       = "Gainsboro";
+    color = "Gainsboro";
     dessineUnRectanglePlein(boutonReinitGauche + 4,
                             boutonReinitHaut,
                             espaceDroite - 8,
@@ -704,11 +813,11 @@ function dessineBoutonReinit(couleurBord) {
                             couleurBord,
                             3);
 
-    context.font = "bold 20px Cambria";
-    context.textAlign = 'center';
+    context.font         = "bold 20px Cambria";
+    context.textAlign    = 'center';
     context.textBaseline = 'middle';
 
-    context.fillStyle = "grey";
+    context.fillStyle    = "grey";
     context.fillText("Nouveau dessin", (boutonReinitGauche + boutonReinitDroite) / 2, (boutonReinitHaut + boutonReinitBas) / 2);
 
     context.restore();
@@ -732,8 +841,8 @@ function dessinerTempsRestant() {
                           couleurFond,
                           3);
 
-  context.font = "bold 110px Cambria";
-  context.textAlign = 'center';
+  context.font         = "bold 110px Cambria";
+  context.textAlign    = 'center';
   context.textBaseline = 'middle';
 
   couleurTempsRestantRouge = 0xFF - Math.trunc((0xFF) * tempsRestant / tempsRestantMax);
@@ -764,7 +873,7 @@ function dessineChampReponse(couleurBord) {
     couleurBord = "black";
   }
 
-  color = "Gainsboro";
+  color              = "Gainsboro";
   champReponseGauche = espaceGauche - (espaceGauche / 2) - 25;
   champReponseDroite = canvas.width - (espaceDroite / 2) + 25;
   champReponseHaut   = canvas.height - (espaceBas / 2) - 10;
@@ -777,8 +886,8 @@ function dessineChampReponse(couleurBord) {
                           couleurBord,
                           3);
 
-  context.font = "bold 55px Cambria";
-  context.textAlign = 'center';
+  context.font         = "bold 55px Cambria";
+  context.textAlign    = 'center';
   context.textBaseline = 'middle';
 
   context.fillStyle = "black";
@@ -793,7 +902,7 @@ function dessineTempsRestant(couleurBord) {
     couleurBord = "black";
   }
 
-  color       = "Gainsboro";
+  color              = "Gainsboro";
   boutonReinitGauche = canvas.width - espaceDroite;
   boutonReinitDroite = boutonRejouerGauche + espaceDroite;
   boutonReinitHaut   = espaceHaut + espaceTitre + 100;
@@ -806,11 +915,11 @@ function dessineTempsRestant(couleurBord) {
                           couleurBord,
                           3);
 
-  context.font = "bold 20px Cambria";
-  context.textAlign = 'center';
+  context.font         = "bold 20px Cambria";
+  context.textAlign    = 'center';
   context.textBaseline = 'middle';
 
-  context.fillStyle = "grey";
+  context.fillStyle    = "grey";
   context.fillText("Nouveau dessin", (boutonReinitGauche + boutonReinitDroite) / 2, (boutonReinitHaut + boutonReinitBas) / 2);
 
   context.restore();
@@ -853,10 +962,10 @@ function dessineLigne(x, y, taille, couleur, type) {
 
 
 function demarreLigne(x, y, taille, couleur) {
-  console.log("demarreLigne(" + x + ", " + y + ", " + taille + ", " + couleur + ")")
   contextLigne.beginPath();
-  contextLigne.lineWidth = taille;
+  contextLigne.lineWidth   = taille;
   contextLigne.strokeStyle = couleur;
+  contextLigne.lineCap = "round"
   contextLigne.moveTo (x, y);
   contextLigne.lineTo(x, y);
   contextLigne.stroke();
@@ -864,16 +973,15 @@ function demarreLigne(x, y, taille, couleur) {
 
 
 function continuLigne(x, y, taille, couleur) {
-  console.log("continuLigne(" + x + ", " + y + ", " + taille + ", " + couleur + ")")
-  contextLigne.lineWidth = taille;
+  contextLigne.lineWidth   = taille;
   contextLigne.strokeStyle = couleur;
+  contextLigne.lineCap = "round"
   contextLigne.lineTo(x, y);
   contextLigne.stroke();
 }
 
 
 function finiLigne(x, y, taille, couleur) {
-  console.log("   finiLigne(" + x + ", " + y + ", " + taille + ", " + couleur + ")")
   contextLigne.closePath();
   contextLigne.restore();
 }
@@ -885,7 +993,7 @@ function ecouterSouris() {
     if (typeDeJoueur === "Dessinateur") {
       if (ecouteMousemove) {
         if ((mousePos.x >= (dessinGauche + taillePointCrayon / 2) && mousePos.x <= (dessinDroite - taillePointCrayon / 2))
-         && (mousePos.y >= (dessinHaut + taillePointCrayon / 2) && mousePos.y <= (dessinBas - taillePointCrayon / 2) )) {
+         && (mousePos.y >= (dessinHaut + taillePointCrayon / 2)   && mousePos.y <= (dessinBas - taillePointCrayon / 2) )) {
            let colorCrayon = couleurCrayon;
 
         // dessineUnRectanglePlein(mousePos.x - (taillePointCrayon / 2), mousePos.y - (taillePointCrayon / 2), taillePointCrayon, taillePointCrayon, colorCrayon, "", 0);
@@ -909,59 +1017,34 @@ function ecouterSouris() {
         }
       }
       if ((mousePos.x >= couleurNoirGauche && mousePos.x <= couleurNoirDroite)
-      && (mousePos.y >= couleurNoirHaut && mousePos.y <= couleurNoirBas )) {
+      &&  (mousePos.y >= couleurNoirHaut   && mousePos.y <= couleurNoirBas )) {
         dessineBoutonsCouleur();
         dessineBoutonNoir("gold");
       }
       if ((mousePos.x >= couleurBleuGauche && mousePos.x <= couleurBleuDroite)
-      && (mousePos.y >= couleurBleuHaut && mousePos.y <= couleurBleuBas )) {
+      &&  (mousePos.y >= couleurBleuHaut   && mousePos.y <= couleurBleuBas )) {
         dessineBoutonsCouleur();
         dessineBoutonBleu("gold");
       }
       if ((mousePos.x >= couleurRougeGauche && mousePos.x <= couleurRougeDroite)
-      && (mousePos.y >= couleurRougeHaut && mousePos.y <= couleurRougeBas )) {
+      &&  (mousePos.y >= couleurRougeHaut   && mousePos.y <= couleurRougeBas )) {
         dessineBoutonsCouleur();
         dessineBoutonRouge("gold");
       }
       if ((mousePos.x >= couleurJauneGauche && mousePos.x <= couleurJauneDroite)
-      && (mousePos.y >= couleurJauneHaut && mousePos.y <= couleurJauneBas )) {
+      &&  (mousePos.y >= couleurJauneHaut   && mousePos.y <= couleurJauneBas )) {
         dessineBoutonsCouleur();
         dessineBoutonJaune("gold");
       }
       if ((mousePos.x >= couleurVertGauche && mousePos.x <= couleurVertDroite)
-      && (mousePos.y >= couleurVertHaut && mousePos.y <= couleurVertBas )) {
+      &&  (mousePos.y >= couleurVertHaut   && mousePos.y <= couleurVertBas )) {
         dessineBoutonsCouleur();
         dessineBoutonVert("gold");
       }
-      if ((mousePos.x >= point2Gauche && mousePos.x <= point2Droite)
-      && (mousePos.y >= point2Haut && mousePos.y <= point2Bas )) {
-        dessineBoutonsPoint();
-        dessineBoutonPoint2("gold");
-      }
-      if ((mousePos.x >= point4Gauche && mousePos.x <= point4Droite)
-      && (mousePos.y >= point4Haut && mousePos.y <= point4Bas )) {
-        dessineBoutonsPoint();
-        dessineBoutonPoint4("gold");
-      }
-      if ((mousePos.x >= point6Gauche && mousePos.x <= point6Droite)
-      && (mousePos.y >= point6Haut && mousePos.y <= point6Bas )) {
-        dessineBoutonsPoint();
-        dessineBoutonPoint6("gold");
-      }
-      if ((mousePos.x >= point8Gauche && mousePos.x <= point8Droite)
-      && (mousePos.y >= point8Haut && mousePos.y <= point8Bas )) {
-        dessineBoutonsPoint();
-        dessineBoutonPoint8("gold");
-      }
-      if ((mousePos.x >= point10Gauche && mousePos.x <= point10Droite)
-      && (mousePos.y >= point10Haut && mousePos.y <= point10Bas )) {
-        dessineBoutonsPoint();
-        dessineBoutonPoint10("gold");
-      }
       if  ( ((mousePos.x >= couleurNoirGauche - 30 && mousePos.x <= couleurVertDroite + 30)
-      && (mousePos.y >= couleurNoirHaut - 30 && mousePos.y <= couleurNoirBas + 30))
-      && !((mousePos.x >= couleurNoirGauche && mousePos.x <= couleurVertDroite)
-      && (mousePos.y >= couleurNoirHaut && mousePos.y <= couleurNoirBas ))
+      &&     (mousePos.y >= couleurNoirHaut - 30   && mousePos.y <= couleurNoirBas + 30))
+      &&   !((mousePos.x >= couleurNoirGauche      && mousePos.x <= couleurVertDroite)
+      &&     (mousePos.y >= couleurNoirHaut        && mousePos.y <= couleurNoirBas ))
           ) {
         dessineBoutonsCouleur();
         switch (couleurCrayon) {
@@ -1010,13 +1093,12 @@ function ecouterSouris() {
 });
 
   $(canvas).on('mousedown', function (evt) { // au click de la souris
-    console.log("mousedown");
     mousePos = getMousePos(canvas, evt);
     if (typeDeJoueur === "Dessinateur") {
       ecouteMousemove = true;
       if (ecouteMousemove) {
         if ((mousePos.x >= (dessinGauche + taillePointCrayon / 2) && mousePos.x <= (dessinDroite - taillePointCrayon / 2))
-         && (mousePos.y >= (dessinHaut + taillePointCrayon / 2) && mousePos.y <= (dessinBas - taillePointCrayon / 2) )) {
+         && (mousePos.y >= (dessinHaut + taillePointCrayon / 2)   && mousePos.y <= (dessinBas - taillePointCrayon / 2) )) {
            let colorCrayon = couleurCrayon;
         //   dessineUnRectanglePlein(mousePos.x - (taillePointCrayon / 2), mousePos.y - (taillePointCrayon / 2), taillePointCrayon, taillePointCrayon, colorCrayon, "", 0);
            let dessinPoint = {
@@ -1038,7 +1120,7 @@ function ecouterSouris() {
         }
       }
       if ((mousePos.x >= boutonReinitGauche && mousePos.x <= boutonReinitDroite)
-        && (mousePos.y >= boutonReinitHaut && mousePos.y <= boutonReinitBas )) {
+       && (mousePos.y >= boutonReinitHaut   && mousePos.y <= boutonReinitBas )) {
         dessineBoutonReinit("gold");
       }
     }
@@ -1046,32 +1128,31 @@ function ecouterSouris() {
 
     if (typeDeJoueur === "Terminé") {
       if ((mousePos.x >= boutonReinitGauche && mousePos.x <= boutonReinitDroite)
-        && (mousePos.y >= boutonReinitHaut && mousePos.y <= boutonReinitBas )) {
+       && (mousePos.y >= boutonReinitHaut   && mousePos.y <= boutonReinitBas )) {
         dessineBoutonReinit("gold");
       }
     }
 
     if (typeDeJoueur === "Observateur") {
       if ((mousePos.x >= boutonRejouerGauche && mousePos.x <= boutonRejouerDroite)
-        && (mousePos.y >= boutonRejouerHaut && mousePos.y <= boutonRejouerBas )) {
+       && (mousePos.y >= boutonRejouerHaut   && mousePos.y <= boutonRejouerBas )) {
         dessineBoutonRejouer("gold");
       }
     }
 
     if ((mousePos.x >= boutonActeurGauche && mousePos.x <= boutonActeurDroite)
-      && (mousePos.y >= boutonActeurHaut && mousePos.y <= boutonActeurBas )) {
+     && (mousePos.y >= boutonActeurHaut   && mousePos.y <= boutonActeurBas )) {
       dessineBoutonActeur("gold");
     }
 
   });
 
   $(canvas).on('mouseup', function (evt) { // au click de la souris
-    console.log("mouseup");
     ecouteMousemove = false;
     mousePos = getMousePos(canvas, evt);
     if (typeDeJoueur === "Dessinateur") {
       if ((mousePos.x >= (dessinGauche + taillePointCrayon / 2) && mousePos.x <= (dessinDroite - taillePointCrayon / 2))
-       && (mousePos.y >= (dessinHaut + taillePointCrayon / 2) && mousePos.y <= (dessinBas - taillePointCrayon / 2) )) {
+       && (mousePos.y >= (dessinHaut + taillePointCrayon / 2)   && mousePos.y <= (dessinBas - taillePointCrayon / 2) )) {
         let colorCrayon = couleurCrayon;
       //   dessineUnRectanglePlein(mousePos.x - (taillePointCrayon / 2), mousePos.y - (taillePointCrayon / 2), taillePointCrayon, taillePointCrayon, colorCrayon, "", 0);
         let dessinPoint = {
@@ -1096,68 +1177,68 @@ function ecouterSouris() {
       }
 
       if ((mousePos.x >= couleurNoirGauche && mousePos.x <= couleurNoirDroite)
-      && (mousePos.y >= couleurNoirHaut && mousePos.y <= couleurNoirBas )) {
+       && (mousePos.y >= couleurNoirHaut   && mousePos.y <= couleurNoirBas )) {
         couleurCrayon = couleurNoir;
         dessineBoutonsCouleur();
         dessineBoutonNoir("gold");
       }
       if ((mousePos.x >= couleurBleuGauche && mousePos.x <= couleurBleuDroite)
-      && (mousePos.y >= couleurBleuHaut && mousePos.y <= couleurBleuBas )) {
+       && (mousePos.y >= couleurBleuHaut   && mousePos.y <= couleurBleuBas )) {
         couleurCrayon = couleurBleu;
         dessineBoutonsCouleur();
         dessineBoutonBleu("gold");
       }
       if ((mousePos.x >= couleurRougeGauche && mousePos.x <= couleurRougeDroite)
-      && (mousePos.y >= couleurRougeHaut && mousePos.y <= couleurRougeBas )) {
+       && (mousePos.y >= couleurRougeHaut   && mousePos.y <= couleurRougeBas )) {
         couleurCrayon = couleurRouge;
         dessineBoutonsCouleur();
         dessineBoutonRouge("gold");
       }
       if ((mousePos.x >= couleurJauneGauche && mousePos.x <= couleurJauneDroite)
-      && (mousePos.y >= couleurJauneHaut && mousePos.y <= couleurJauneBas )) {
+       && (mousePos.y >= couleurJauneHaut   && mousePos.y <= couleurJauneBas )) {
         couleurCrayon = couleurJaune;
         dessineBoutonsCouleur();
         dessineBoutonJaune("gold");
       }
       if ((mousePos.x >= couleurVertGauche && mousePos.x <= couleurVertDroite)
-      && (mousePos.y >= couleurVertHaut && mousePos.y <= couleurVertBas )) {
+       && (mousePos.y >= couleurVertHaut   && mousePos.y <= couleurVertBas )) {
         couleurCrayon = couleurVert;
         dessineBoutonsCouleur();
         dessineBoutonVert("gold");
       }
 
       if ((mousePos.x >= point2Gauche && mousePos.x <= point2Droite)
-      && (mousePos.y >= point2Haut && mousePos.y <= point2Bas )) {
+       && (mousePos.y >= point2Haut   && mousePos.y <= point2Bas )) {
         taillePointCrayon = point2;
         dessineBoutonsPoint();
         dessineBoutonPoint2("gold");
       }
       if ((mousePos.x >= point4Gauche && mousePos.x <= point4Droite)
-      && (mousePos.y >= point4Haut && mousePos.y <= point4Bas )) {
+       && (mousePos.y >= point4Haut   && mousePos.y <= point4Bas )) {
         taillePointCrayon = point4;
         dessineBoutonsPoint();
         dessineBoutonPoint4("gold");
       }
       if ((mousePos.x >= point6Gauche && mousePos.x <= point6Droite)
-      && (mousePos.y >= point6Haut && mousePos.y <= point6Bas )) {
+       && (mousePos.y >= point6Haut   && mousePos.y <= point6Bas )) {
         taillePointCrayon = point6;
         dessineBoutonsPoint();
         dessineBoutonPoint6("gold");
       }
       if ((mousePos.x >= point8Gauche && mousePos.x <= point8Droite)
-      && (mousePos.y >= point8Haut && mousePos.y <= point8Bas )) {
+       && (mousePos.y >= point8Haut   && mousePos.y <= point8Bas )) {
         taillePointCrayon = point8;
         dessineBoutonsPoint();
         dessineBoutonPoint8("gold");
       }
       if ((mousePos.x >= point10Gauche && mousePos.x <= point10Droite)
-      && (mousePos.y >= point10Haut && mousePos.y <= point10Bas )) {
+       && (mousePos.y >= point10Haut   && mousePos.y <= point10Bas )) {
         taillePointCrayon = point10;
         dessineBoutonsPoint();
         dessineBoutonPoint10("gold");
       }
       if ((mousePos.x >= boutonReinitGauche && mousePos.x <= boutonReinitDroite)
-        && (mousePos.y >= boutonReinitHaut && mousePos.y <= boutonReinitBas )) {
+       && (mousePos.y >= boutonReinitHaut   && mousePos.y <= boutonReinitBas )) {
         dessineBoutonReinit();
         reinitDessin();
         demarrerCompteurTemps();
@@ -1166,7 +1247,7 @@ function ecouterSouris() {
 
     if (typeDeJoueur === "Terminé") {
       if ((mousePos.x >= boutonReinitGauche && mousePos.x <= boutonReinitDroite)
-        && (mousePos.y >= boutonReinitHaut && mousePos.y <= boutonReinitBas )) {
+       && (mousePos.y >= boutonReinitHaut   && mousePos.y <= boutonReinitBas )) {
         dessineBoutonReinit();
         reinitDessin();
         demarrerCompteurTemps();
@@ -1176,24 +1257,82 @@ function ecouterSouris() {
 
     if (typeDeJoueur === "Observateur") {
       if ((mousePos.x >= boutonRejouerGauche && mousePos.x <= boutonRejouerDroite)
-        && (mousePos.y >= boutonRejouerHaut && mousePos.y <= boutonRejouerBas )) {
+       && (mousePos.y >= boutonRejouerHaut   && mousePos.y <= boutonRejouerBas )) {
         dessineBoutonRejouer();
         rejouerDessin();
       }
     }
 
     if ((mousePos.x >= boutonActeurGauche && mousePos.x <= boutonActeurDroite)
-      && (mousePos.y >= boutonActeurHaut && mousePos.y <= boutonActeurBas )) {
+     && (mousePos.y >= boutonActeurHaut   && mousePos.y <= boutonActeurBas )) {
       if (typeDeJoueur === "Dessinateur") {
         typeDeJoueur = "Observateur";
         dessineChampReponse();
+        effacerBoutons();
       } else {
         typeDeJoueur = "Dessinateur";
         viderReponse();
+        dessineBoutonsCouleur();
+        dessineBoutonsPoint();
       }
       dessineBoutonRejouer();
       dessineBoutonReinit();
       dessineBoutonActeur();
+    }
+  });
+  $(canvas).on('wheel', function (evt) {
+    mousePos = getMousePos(canvas, evt);
+    if ((mousePos.x >= point2Gauche && mousePos.x <= point2Droite)
+     && (mousePos.y >= point2Haut   && mousePos.y <= point10Bas )) {
+      if (typeDeJoueur === "Dessinateur") {
+         if (evt.originalEvent.deltaY > 0) { // Tour de molette vers le bas
+          switch (taillePointCrayon){
+            case point2:
+              dessineBoutonPoint2("black");
+              dessineBoutonPoint4("gold");
+              taillePointCrayon = 4;
+              break;
+            case point4 :
+              dessineBoutonPoint4("black");
+              dessineBoutonPoint6("gold");
+              taillePointCrayon = 6;
+              break;
+            case point6 :
+              dessineBoutonPoint6("black");
+              dessineBoutonPoint8("gold");
+              taillePointCrayon = 8;
+              break;
+            case point8 :
+              dessineBoutonPoint8("black");
+              dessineBoutonPoint10("gold");
+              taillePointCrayon = 10;
+              break;
+          }
+        } else {                            // Tour de molette vers le haut
+          switch (taillePointCrayon) {
+            case point4:
+              dessineBoutonPoint4("black");
+              dessineBoutonPoint2("gold");
+              taillePointCrayon = 2;
+              break;
+            case point6 :
+              dessineBoutonPoint6("black");
+              dessineBoutonPoint4("gold");
+              taillePointCrayon = 4;
+              break;
+            case point8 :
+              dessineBoutonPoint8("black");
+              dessineBoutonPoint6("gold");
+              taillePointCrayon = 6;
+              break;
+            case point10 :
+              dessineBoutonPoint10("black");
+              dessineBoutonPoint8("gold");
+              taillePointCrayon = 8;
+              break;
+          }
+        }
+      }
     }
   });
 }
@@ -1219,13 +1358,13 @@ function ecouterClavier() {
           reponse += charCode;
           dessineChampReponse();
         }
-      }
+      } else
       if (key === VK_BACKSPACE) { // Backspace
         if (reponse.length > 0) {
           reponse = reponse.substr(0, reponse.length - 1);
           dessineChampReponse();
         }
-      }
+      } else
       if (key === VK_ENTER) { // Enter
         if (reponse.length > 0) {
           if (reponse == "MAISON") {
@@ -1234,6 +1373,15 @@ function ecouterClavier() {
             // dessiner DESSINATEUR A GAGNE
             context.font = "bold 80px Cambria";
             context.textAlign = 'center';
+            context.fillStyle = "black";
+            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 - 4 , (dessinBas + dessinHaut) / 2);
+            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 + 4 , (dessinBas + dessinHaut) / 2);
+            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2 - 4);
+            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2 + 4);
+            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 - 4 , (dessinBas + dessinHaut) / 2 - 4);
+            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 - 4, (dessinBas + dessinHaut) / 2 + 4);
+            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 + 4, (dessinBas + dessinHaut) / 2 - 4);
+            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 + 4 , (dessinBas + dessinHaut) / 2 + 4);
             context.fillStyle = "gold";
             context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2);
             typeDeJoueur = "Terminé";
@@ -1257,22 +1405,23 @@ function ecouterWebSocket() {
 
 
 function getMousePos(canvas, evt) {
-   let rect = canvas.getBoundingClientRect();
    return {
-      x: Math.trunc(evt.clientX - rect.left),
-      y: Math.trunc(evt.clientY - rect.top)
+      x: evt.originalEvent.offsetX,
+      y: evt.originalEvent.offsetY
    };
 }
 
 function rejouerDessin() {
   dessinePlancheADessin("white");
   i = 0;
+  document.body.style.cursor='progress';
   redessineDessin();
 }
 
 function reinitDessin() {
   dessinePlancheADessin("white");
   dessin = [];
+  reponse = "";
 }
 
 function redessineDessin() {
@@ -1290,6 +1439,8 @@ function redessineDessin() {
     savePoint.dessine(contextLigne);
     //dessineLigne(dessinPoint.x, dessinPoint.y, dessinPoint.taille, dessinPoint.couleur, dessinPoint.type);
     varTimeOut = setTimeout(redessineDessin, 0);
+  } else {
+    document.body.style.cursor='pointer';
   }
 }
 
