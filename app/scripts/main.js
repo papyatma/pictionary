@@ -13,7 +13,7 @@ let typeDeJoueur = "Dessinateur";
 let couleurFond = "FloralWhite";
 
 let intervalTemps;
-let tempsRestantMax = 30;
+let tempsRestantMax = 99;
 let tempsRestant;
 let couleurTempsRestant      = "#000000";
 let couleurTempsRestantRouge = 0xFF;
@@ -1001,7 +1001,7 @@ function ecouterSouris() {
            let colorCrayon
            if(evt.which == 3) {
              console.log("Bouton droite enfoncé");
-             colorCrayon = couleurFond;
+             colorCrayon = "white";
            } else {
              colorCrayon = couleurCrayon;
            }
@@ -1112,7 +1112,7 @@ function ecouterSouris() {
            let colorCrayon
            if(evt.which == 3) {
              console.log("Bouton droite enfoncé");
-             colorCrayon = couleurFond;
+             colorCrayon = "white";
            } else {
              colorCrayon = couleurCrayon;
            }
@@ -1172,7 +1172,7 @@ function ecouterSouris() {
          let colorCrayon = couleurCrayon;
          if(evt.which == 3) {
            console.log("Bouton droite enfoncé");
-           let colorCrayon = couleurFond;
+           let colorCrayon = "white";
          } else {
            let colorCrayon = couleurCrayon;
          }
