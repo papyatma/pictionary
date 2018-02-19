@@ -825,7 +825,7 @@ function dessineBoutonReinit(couleurBord) {
 }
 
 function dessinerTempsRestant() {
-  // abcd
+
   color       = "Gainsboro";
 
   let tempsRestantGauche = canvas.width - espaceDroite + 10;
@@ -988,13 +988,23 @@ function finiLigne(x, y, taille, couleur) {
 
 
 function ecouterSouris() {
+  $('body').on('contextmenu', '#canvasPictionary', function(e) { // supprime l'apparition du contexte-menu quand Click Bouton Droit
+    return false;
+  });
+
   $(canvas).on('mousemove', function (evt) { // au survol de la souris
     mousePos = getMousePos(canvas, evt);
     if (typeDeJoueur === "Dessinateur") {
       if (ecouteMousemove) {
         if ((mousePos.x >= (dessinGauche + taillePointCrayon / 2) && mousePos.x <= (dessinDroite - taillePointCrayon / 2))
          && (mousePos.y >= (dessinHaut + taillePointCrayon / 2)   && mousePos.y <= (dessinBas - taillePointCrayon / 2) )) {
-           let colorCrayon = couleurCrayon;
+           let colorCrayon
+           if(evt.which == 3) {
+             console.log("Bouton droite enfoncé");
+             colorCrayon = couleurFond;
+           } else {
+             colorCrayon = couleurCrayon;
+           }
 
         // dessineUnRectanglePlein(mousePos.x - (taillePointCrayon / 2), mousePos.y - (taillePointCrayon / 2), taillePointCrayon, taillePointCrayon, colorCrayon, "", 0);
            let dessinPoint = {
@@ -1099,7 +1109,13 @@ function ecouterSouris() {
       if (ecouteMousemove) {
         if ((mousePos.x >= (dessinGauche + taillePointCrayon / 2) && mousePos.x <= (dessinDroite - taillePointCrayon / 2))
          && (mousePos.y >= (dessinHaut + taillePointCrayon / 2)   && mousePos.y <= (dessinBas - taillePointCrayon / 2) )) {
-           let colorCrayon = couleurCrayon;
+           let colorCrayon
+           if(evt.which == 3) {
+             console.log("Bouton droite enfoncé");
+             colorCrayon = couleurFond;
+           } else {
+             colorCrayon = couleurCrayon;
+           }
         //   dessineUnRectanglePlein(mousePos.x - (taillePointCrayon / 2), mousePos.y - (taillePointCrayon / 2), taillePointCrayon, taillePointCrayon, colorCrayon, "", 0);
            let dessinPoint = {
              x: 0,
@@ -1153,7 +1169,13 @@ function ecouterSouris() {
     if (typeDeJoueur === "Dessinateur") {
       if ((mousePos.x >= (dessinGauche + taillePointCrayon / 2) && mousePos.x <= (dessinDroite - taillePointCrayon / 2))
        && (mousePos.y >= (dessinHaut + taillePointCrayon / 2)   && mousePos.y <= (dessinBas - taillePointCrayon / 2) )) {
-        let colorCrayon = couleurCrayon;
+         let colorCrayon = couleurCrayon;
+         if(evt.which == 3) {
+           console.log("Bouton droite enfoncé");
+           let colorCrayon = couleurFond;
+         } else {
+           let colorCrayon = couleurCrayon;
+         }
       //   dessineUnRectanglePlein(mousePos.x - (taillePointCrayon / 2), mousePos.y - (taillePointCrayon / 2), taillePointCrayon, taillePointCrayon, colorCrayon, "", 0);
         let dessinPoint = {
           x: 0,
@@ -1394,13 +1416,13 @@ function ecouterClavier() {
 }
 
 function ecouterWebSocket() {
-  let exampleSocket = new WebSocket("ws://localhost:9000");
+/*  let exampleSocket = new WebSocket("ws://localhost:9000");
 
   socket = io();
   socket.on('Point', function(point){
     console.log(event.data);
     console.log("point", point);
-  });
+  }); */
 }
 
 
@@ -1447,5 +1469,5 @@ function redessineDessin() {
 
 function envoiPoint(Point) {
   dessin.push(Point);
-  socket.emit('Point', Point);
+/*  socket.emit('Point', Point); */
 }
