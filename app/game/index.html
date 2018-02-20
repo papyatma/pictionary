@@ -3,10 +3,32 @@
    <head>
       <meta charset="utf-8">
       <title>JEU</title>
-      <link rel="stylesheet" href="./../styles/main.css">
-   </head>
-   <body>
+      <head>
+		<meta charset="utf-8">
+		<title>Pictionary</title>
+		<!-- styles -->
+		<script src="http://code.jquery.com/jquery-latest.js"></script>
+		<link rel="stylesheet" href="styles/main.css">
+		<!--/ styles -->
+	</head>
 
+	<body>
+		<header>
+			<h1>Pictionary</h1>
+		</header>
+		<Section>
+			<div id="divCanvas">
+				<canvas id="canvasPictionary">
+				</canvas>
+			</div>
+		</section>
+		<!-- scripts -->
+		<script src="http://127.0.0.1:35729/livereload.js?snipver=1"></script>
+		<!--<script src="/socket.io/socket.io.js"></script> -->
+		  <script src="./../scripts/const.js"></script>
+		  <script src="./../scripts/point.js"></script>
+		  <script src="./../scripts/main.js"></script>
+      <script src="./../scripts/canvas.js"></script>
       <script src="http://127.0.0.1:35729/livereload.js?snipver=1"></script>
       <script src="./../scripts/jquery-3.3.1.min.js"></script>
       <script src="./../scripts/jeu.js"></script>

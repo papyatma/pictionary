@@ -6,18 +6,35 @@
 // | nodemon server.js      |
 // +------------------------+
 
-const PORT = 9000;
+// modules
 const express = require('express');
 const session	=	require('express-session');
 const app = express();
+const bodyParser = require('body-parser');
 const http = require('http');
 const socketIo = require('socket.io');
 
 app.use(session({secret: 'LdfsfhKirbfg',saveUninitialized: true,resave: true}));
 
-app.use('/',express.static(__dirname + '/app'));
+//const http = require('http').Server(app);
+//const io = require('socket.io')(http);
 
-const bodyParser=require('body-parser');
+app.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', "*");
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    next();
+});
+
+app.use('/', express.static(__dirname + '/app'));
+
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.get('/', function(req, res){
+  console.log("server OK");
+});
+
 
 const authenticateController=require('./controllers/authenticate-controller');
 const registerController=require('./controllers/register-controller');
@@ -63,7 +80,9 @@ io.on('connection', function (socket) {
 });
 
 
-console.log(`-----------------------------
-| The root folder is: '${__dirname}/app'
-| You can access the application at: http://localhost:${PORT}
-------------------------------------------`);
+io.on('connection', function(socket) {
+  socket.on('Point', function(point) {
+    console.log('message recu au serveur: ', point);
+    io.send(point);
+  });
+});
