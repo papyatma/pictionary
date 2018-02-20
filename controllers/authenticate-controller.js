@@ -11,9 +11,12 @@ module.exports.authenticate=function(req,res){
       }else{
         if(results.length >0){
             if(password==results[0].password){
+              req.session.authenticated = true;
+              req.session.results = results;
                 res.json({
                     status:true,
-                    message:'Connexion réusie'
+                    message:'Connexion réusie',
+                    username: results[0].username
                 })
             }else{
                 res.json({

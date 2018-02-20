@@ -6,6 +6,11 @@ body {
     margin: 0;
     background-color: grey;
 }
+
+#canvas {
+   display: block;
+}
+
 #login { /* box formulaire */
   background:
     radial-gradient(black 15%, transparent 16%) 0 0,

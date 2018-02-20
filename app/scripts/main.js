@@ -69,10 +69,11 @@ let password;
         let resp = xhr.response;
 
         let message = JSON.parse(resp);
+        console.log(message);
 
         if (message.status == true) {
-            console.log("OK");
-            window.location.href = '/jeu';
+            console.log(message.username);
+            window.location.href = 'api/game';
         } else {
             window.location.href = '/login.html';
         }
@@ -87,13 +88,37 @@ let password;
         let resp = xhr.response;
 
         let message = JSON.parse(resp);
+        console.log(message);
 
         if (message.status == true) {
             console.log("OK");
-            window.location.href = '/jeu';
+          //  window.location.href = '/jeu/?username=';
         } else {
-            window.location.href = '/login.html';
+            //window.location.href = '/login.html';
         }
     }
+
+
+    /*let crypto = require('crypto'),
+    algorithm = 'aes-256-ctr',
+    password = 'd6F3Efeq';
+
+    function encrypt(text){
+      let cipher = crypto.createCipher(algorithm,password)
+      let crypted = cipher.update(text,'utf8','hex')
+      crypted += cipher.final('hex');
+      return crypted;
+    }
+
+    function decrypt(text){
+      let decipher = crypto.createDecipher(algorithm,password)
+      let dec = decipher.update(text,'hex','utf8')
+      dec += decipher.final('utf8');
+      return dec;
+    }
+
+    let hw = encrypt("hello world")
+    // outputs hello world
+    console.log(decrypt(hw));*/
 
 })();
