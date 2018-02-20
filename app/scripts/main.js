@@ -1,12 +1,15 @@
 
-'use strict';
+"use strict";
 
 let canvas;
 let context;
 let contextLigne;
+let contextLigneReception;
 
 let i;
 let varTimeOut;
+
+let motATrouver = "maison";
 
 let typeDeJoueur = "Dessinateur";
 
@@ -27,9 +30,10 @@ let tempsRestantDroite;
 let color;
 let colorBorder;
 
-let nomJoueur1 = "Christophe";
-let nomJoueur2 = "Eric";
-
+let nomJoueur1 = "Gagné";
+let nomJoueur2 = "Perdu";
+let scoreGagne = 0;
+let scorePerdu = 0;
 
 let espaceDroite = 150;
 let espaceGauche = 150;
@@ -38,6 +42,8 @@ let espaceHaut   = 75;
 
 let espaceTitre  = 70;
 
+let etatManche  = "enCours"; // ou terminé
+let etatRejouer = false;
 let ecoutePosee = false;
 
 let mousePos = {
@@ -170,10 +176,13 @@ let dessinPoint = {
 let socket;
 
 (function init() {
-  canvas       = document.querySelector('#canvasPictionary');
-  context      = canvas.getContext('2d');
-  contextLigne = canvas.getContext('2d');
 
+  canvas                = document.querySelector("#canvasPictionary");
+  context               = canvas.getContext("2d");
+  contextLigne          = canvas.getContext("2d");
+  contextLigneReception = canvas.getContext("2d");
+
+  let socket   = io.connect();
 
   couleurTempsRestantRouge = 0;    // (0xFF)
   couleurTempsRestantVert  = 255;
@@ -185,6 +194,9 @@ let socket;
   contextLigne.save();
   dessinePlateau();
   demarrerCompteurTemps();
+  socket.emit("InitScore");
+  socket.emit("Mot");
+    dessineChampMotATrouver();
 })();
 
 function demarrerCompteurTemps() {
@@ -195,34 +207,58 @@ function demarrerCompteurTemps() {
   dessinerTempsRestant();
 
   intervalTemps = setInterval(function() {
+    console.log("temps restant");
     if (tempsRestant > 0) {
       tempsRestant--;
       dessinerTempsRestant();
     }
     if (tempsRestant <= 0) {
       arreterCompteurTemps();
-      console.log("Dessinateur a Gagné");
-      // dessiner DESSINATEUR A GAGNE
-      context.font = "bold 100px Cambria";
-      context.textAlign = 'center';
-      context.fillStyle = "black";
-      context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 + 4, (dessinBas + dessinHaut) / 2);
-      context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 - 4, (dessinBas + dessinHaut) / 2);
-      context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2 + 4);
-      context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2 - 4);
-      context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 + 4, (dessinBas + dessinHaut) / 2 + 4);
-      context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 - 4, (dessinBas + dessinHaut) / 2 - 4);
-      context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 - 4, (dessinBas + dessinHaut) / 2 + 4);
-      context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 + 4, (dessinBas + dessinHaut) / 2 - 4);
-      context.font = "bold 100px Cambria";
-      context.textAlign = 'center';
-      context.fillStyle = "gold";
-      context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2);
-      typeDeJoueur = "Terminé";
-      context.restore();
+      console.log("Partie Perdue");
+      if (typeDeJoueur === "Dessinateur") {
+        socket.emit("Perdu");
+        // dessiner DESSINATEUR A GAGNE
+        socket.emit("Point", "Perdu");
+      }
     }
   }, 1000);
 
+}
+
+function dessinePerdu() {
+  context.font = "bold 100px Cambria";
+  context.textAlign = "center";
+  context.fillStyle = "black";
+  context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 + 4, (dessinBas + dessinHaut) / 2);
+  context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 - 4, (dessinBas + dessinHaut) / 2);
+  context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2 + 4);
+  context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2 - 4);
+  context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 + 4, (dessinBas + dessinHaut) / 2 + 4);
+  context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 - 4, (dessinBas + dessinHaut) / 2 - 4);
+  context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 - 4, (dessinBas + dessinHaut) / 2 + 4);
+  context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 + 4, (dessinBas + dessinHaut) / 2 - 4);
+  context.fillStyle = "gold";
+  context.fillText("Perdu", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2);
+  etatManche = "Terminé";
+  context.restore();
+}
+
+function dessineGagne() {
+  context.font = "bold 80px Cambria";
+  context.textAlign = "center";
+  context.fillStyle = "black";
+  context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 - 4 , (dessinBas + dessinHaut) / 2);
+  context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 + 4 , (dessinBas + dessinHaut) / 2);
+  context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2 - 4);
+  context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2 + 4);
+  context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 - 4 , (dessinBas + dessinHaut) / 2 - 4);
+  context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 - 4, (dessinBas + dessinHaut) / 2 + 4);
+  context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 + 4, (dessinBas + dessinHaut) / 2 - 4);
+  context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 + 4 , (dessinBas + dessinHaut) / 2 + 4);
+  context.fillStyle = "gold";
+  context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2);
+  etatManche = "Terminé";
+  context.restore();
 }
 
 function arreterCompteurTemps() {
@@ -267,7 +303,7 @@ function dessineTitre(couleurDebut, couleurMilieu, couleurFin) {
     couleurFin = "GreenYellow";
   }
   context.font = "bold 60px Cambria";
-  context.textAlign = 'center';
+  context.textAlign = "center";
 
   tailleTitre = Math.trunc(context.measureText("Pictionary").width);
   titreHaut   = 16;
@@ -314,12 +350,12 @@ function dessineAutour() {
     context.restore(); // reinit le pinceau
 
     context.font = "bold 60px Cambria";
-    context.textAlign = 'center';
+    context.textAlign = "center";
     context.fillStyle = "black";
-    context.fillText("0", (espaceGauche) / 2, (espaceTitre + espaceHaut ) / 2 - 10);
+    context.fillText(scoreGagne, (espaceGauche) / 2, (espaceTitre + espaceHaut ) / 2 - 10);
 
     context.font = "bold 25px Cambria";
-    context.textAlign = 'center';
+    context.textAlign = "center";
     context.fillStyle = "black";
     context.fillText(nomJoueur1, (espaceGauche) / 2 + 1, espaceTitre + espaceHaut - 30);
     context.fillText(nomJoueur1, (espaceGauche) / 2 - 1, espaceTitre + espaceHaut - 30);
@@ -333,12 +369,12 @@ function dessineAutour() {
     context.fillText(nomJoueur1, (espaceGauche) / 2, espaceTitre + espaceHaut - 30);
 
     context.font = "bold 60px Cambria";
-    context.textAlign = 'center';
+    context.textAlign = "center";
     context.fillStyle = "black";
-    context.fillText("0", canvas.width - (espaceDroite) / 2, (espaceTitre + espaceHaut) / 2 - 10);
+    context.fillText(scorePerdu, canvas.width - (espaceDroite) / 2, (espaceTitre + espaceHaut) / 2 - 10);
 
     context.font = "bold 25px Cambria";
-    context.textAlign = 'center';
+    context.textAlign = "center";
     context.fillStyle = "black";
     context.fillText(nomJoueur2, canvas.width - (espaceDroite) / 2 + 1, espaceTitre + espaceHaut - 30);
     context.fillText(nomJoueur2, canvas.width - (espaceDroite) / 2 - 1, espaceTitre + espaceHaut - 30);
@@ -352,12 +388,19 @@ function dessineAutour() {
     context.fillText(nomJoueur2, canvas.width - (espaceDroite) / 2, espaceTitre + espaceHaut - 30);
 
     context.restore(); // reinit le pinceau
-
-    dessineBoutonActeur();
-    dessineBoutonRejouer();
-    dessineBoutonReinit();
-
-    context.restore();
+    dessinerInterfaceActeur();
+//    dessineBoutonActeur();
+//    dessineBoutonRejouer();
+//    dessineBoutonReinit();
+//
+//    context.restore();
+//
+//    if (typeDeJoueur === "Observateur") {
+//      dessineChampReponse();
+//    } else {
+//      typeDeJoueur = "Dessinateur";
+//      dessineChampMotATrouver();
+//    }
   }
 }
 
@@ -733,13 +776,19 @@ function dessineBoutonActeur(couleurBord) {
                           3);
 
   context.font         = "bold 20px Cambria";
-  context.textAlign    = 'center';
-  context.textBaseline = 'middle';
+  context.textAlign    = "center";
+  context.textBaseline = "middle";
 
   context.fillStyle    = "grey";
   context.fillText(typeDeJoueur, (boutonActeurGauche + boutonActeurDroite) / 2, (boutonActeurHaut + boutonActeurBas) / 2);
 
   context.restore();
+  if (typeDeJoueur === "Dessinateur") {
+    document.body.style.cursor="url(./images/crayon_256x256.png), auto";
+  } else {
+    document.body.style.cursor="url(./images/Viseur.png), auto";
+  }
+
 }
 
 function dessineBoutonRejouer(couleurBord) {
@@ -773,8 +822,8 @@ function dessineBoutonRejouer(couleurBord) {
                             3);
 
     context.font         = "bold 20px Cambria";
-    context.textAlign    = 'center';
-    context.textBaseline = 'middle';
+    context.textAlign    = "center";
+    context.textBaseline = "middle";
 
     context.fillStyle    = "grey";
     context.fillText("Rejouer dessin", (boutonRejouerGauche + boutonRejouerDroite) / 2, (boutonRejouerHaut + boutonRejouerBas) / 2);
@@ -814,8 +863,8 @@ function dessineBoutonReinit(couleurBord) {
                             3);
 
     context.font         = "bold 20px Cambria";
-    context.textAlign    = 'center';
-    context.textBaseline = 'middle';
+    context.textAlign    = "center";
+    context.textBaseline = "middle";
 
     context.fillStyle    = "grey";
     context.fillText("Nouveau dessin", (boutonReinitGauche + boutonReinitDroite) / 2, (boutonReinitHaut + boutonReinitBas) / 2);
@@ -842,8 +891,8 @@ function dessinerTempsRestant() {
                           3);
 
   context.font         = "bold 110px Cambria";
-  context.textAlign    = 'center';
-  context.textBaseline = 'middle';
+  context.textAlign    = "center";
+  context.textBaseline = "middle";
 
   couleurTempsRestantRouge = 0xFF - Math.trunc((0xFF) * tempsRestant / tempsRestantMax);
   couleurTempsRestantVert  = 0x00 + Math.trunc((0xFF) * tempsRestant / tempsRestantMax);
@@ -887,11 +936,44 @@ function dessineChampReponse(couleurBord) {
                           3);
 
   context.font         = "bold 55px Cambria";
-  context.textAlign    = 'center';
-  context.textBaseline = 'middle';
+  context.textAlign    = "center";
+  context.textBaseline = "middle";
 
   context.fillStyle = "black";
   context.fillText(reponse, (champReponseGauche + champReponseDroite) / 2, (champReponseHaut + champReponseBas) / 2);
+
+  context.restore();
+}
+
+function dessineChampMotATrouver(couleurBord) {
+
+  if (!couleurBord) {
+    couleurBord = "black";
+  }
+
+  color              = "Gainsboro";
+  champReponseGauche = espaceGauche - (espaceGauche / 2) - 25;
+  champReponseDroite = canvas.width - (espaceDroite / 2) + 25;
+  champReponseHaut   = canvas.height - (espaceBas / 2) - 10;
+  champReponseBas    = champReponseHaut + 60;
+  dessineUnRectanglePlein(champReponseGauche,
+                          champReponseHaut,
+                          champReponseDroite - champReponseGauche,
+                          60,
+                          color,
+                          couleurBord,
+                          3);
+
+  context.font         = "bold 55px Cambria";
+  context.textAlign    = "center";
+  context.textBaseline = "middle";
+
+  context.font         = "bold 55px Cambria";
+  context.textAlign    = "center";
+  context.textBaseline = "middle";
+
+  context.fillStyle = "black";
+  context.fillText(motATrouver, (champReponseGauche + champReponseDroite) / 2, (champReponseHaut + champReponseBas) / 2);
 
   context.restore();
 }
@@ -916,8 +998,8 @@ function dessineTempsRestant(couleurBord) {
                           3);
 
   context.font         = "bold 20px Cambria";
-  context.textAlign    = 'center';
-  context.textBaseline = 'middle';
+  context.textAlign    = "center";
+  context.textBaseline = "middle";
 
   context.fillStyle    = "grey";
   context.fillText("Nouveau dessin", (boutonReinitGauche + boutonReinitDroite) / 2, (boutonReinitHaut + boutonReinitBas) / 2);
@@ -986,13 +1068,29 @@ function finiLigne(x, y, taille, couleur) {
   contextLigne.restore();
 }
 
+function dessinerInterfaceActeur() {
+  if (typeDeJoueur === "Dessinateur") {
+    viderReponse();
+    dessineChampMotATrouver();
+    dessineBoutonsCouleur();
+    dessineBoutonsPoint();
+  } else {
+    dessineChampReponse();
+    effacerBoutons();
+  }
+  dessineBoutonRejouer();
+  dessineBoutonReinit();
+  dessineBoutonActeur();
+}
+
 
 function ecouterSouris() {
-  $('body').on('contextmenu', '#canvasPictionary', function(e) { // supprime l'apparition du contexte-menu quand Click Bouton Droit
+  $("body").on("contextmenu", "#canvasPictionary", function(e) { // supprime l"apparition du contexte-menu quand Click Bouton Droit
     return false;
   });
 
-  $(canvas).on('mousemove', function (evt) { // au survol de la souris
+  $(canvas).on("mousemove touchmove", function (evt) { // au survol de la souris
+    console.log("touchmove");
     mousePos = getMousePos(canvas, evt);
     if (typeDeJoueur === "Dessinateur") {
       if (ecouteMousemove) {
@@ -1102,7 +1200,9 @@ function ecouterSouris() {
     }
 });
 
-  $(canvas).on('mousedown', function (evt) { // au click de la souris
+  $(canvas).on("mousedown touchend", function (evt) { // au click de la souris
+    console.log("touchend");
+
     mousePos = getMousePos(canvas, evt);
     if (typeDeJoueur === "Dessinateur") {
       ecouteMousemove = true;
@@ -1132,17 +1232,10 @@ function ecouterSouris() {
           //  dessineLigne(dessinPoint.x, dessinPoint.y, dessinPoint.taille, dessinPoint.couleur, dessinPoint.type);
            let savePoint = new Point(dessinPoint.x, dessinPoint.y, dessinPoint.taille, dessinPoint.couleur, dessinPoint.type);
            savePoint.dessine(contextLigne);
+
            envoiPoint(savePoint);
         }
       }
-      if ((mousePos.x >= boutonReinitGauche && mousePos.x <= boutonReinitDroite)
-       && (mousePos.y >= boutonReinitHaut   && mousePos.y <= boutonReinitBas )) {
-        dessineBoutonReinit("gold");
-      }
-    }
-
-
-    if (typeDeJoueur === "Terminé") {
       if ((mousePos.x >= boutonReinitGauche && mousePos.x <= boutonReinitDroite)
        && (mousePos.y >= boutonReinitHaut   && mousePos.y <= boutonReinitBas )) {
         dessineBoutonReinit("gold");
@@ -1163,7 +1256,7 @@ function ecouterSouris() {
 
   });
 
-  $(canvas).on('mouseup', function (evt) { // au click de la souris
+  $(canvas).on("mouseup touchstart", function (evt) { // au click de la souris
     ecouteMousemove = false;
     mousePos = getMousePos(canvas, evt);
     if (typeDeJoueur === "Dessinateur") {
@@ -1263,17 +1356,18 @@ function ecouterSouris() {
        && (mousePos.y >= boutonReinitHaut   && mousePos.y <= boutonReinitBas )) {
         dessineBoutonReinit();
         reinitDessin();
+        socket.emit("InitScore");
+        socket.emit("InitCompteurTemps");
         demarrerCompteurTemps();
+        socket.emit("Mot");
       }
     }
 
-    if (typeDeJoueur === "Terminé") {
+    if (etatManche === "Terminé") {
       if ((mousePos.x >= boutonReinitGauche && mousePos.x <= boutonReinitDroite)
        && (mousePos.y >= boutonReinitHaut   && mousePos.y <= boutonReinitBas )) {
-        dessineBoutonReinit();
-        reinitDessin();
-        demarrerCompteurTemps();
-        typeDeJoueur = "Dessinateur";
+         dessineBoutonRejouer();
+         rejouerDessin();
       }
     }
 
@@ -1287,22 +1381,16 @@ function ecouterSouris() {
 
     if ((mousePos.x >= boutonActeurGauche && mousePos.x <= boutonActeurDroite)
      && (mousePos.y >= boutonActeurHaut   && mousePos.y <= boutonActeurBas )) {
-      if (typeDeJoueur === "Dessinateur") {
-        typeDeJoueur = "Observateur";
-        dessineChampReponse();
-        effacerBoutons();
-      } else {
-        typeDeJoueur = "Dessinateur";
-        viderReponse();
-        dessineBoutonsCouleur();
-        dessineBoutonsPoint();
-      }
-      dessineBoutonRejouer();
-      dessineBoutonReinit();
-      dessineBoutonActeur();
+       if (typeDeJoueur === "Dessinateur") {
+         typeDeJoueur = "Observateur";
+       } else {
+         typeDeJoueur = "Dessinateur";
+       }
+
+       dessinerInterfaceActeur();
     }
   });
-  $(canvas).on('wheel', function (evt) {
+  $(canvas).on("wheel", function (evt) {
     mousePos = getMousePos(canvas, evt);
     if ((mousePos.x >= point2Gauche && mousePos.x <= point2Droite)
      && (mousePos.y >= point2Haut   && mousePos.y <= point10Bas )) {
@@ -1389,25 +1477,15 @@ function ecouterClavier() {
       } else
       if (key === VK_ENTER) { // Enter
         if (reponse.length > 0) {
-          if (reponse == "MAISON") {
+          console.log(reponse);
+          console.log(motATrouver.toUpperCase());
+          if (reponse == motATrouver.toUpperCase()) {
             arreterCompteurTemps();
-            console.log("Dessinateur a Gagné");
+            console.log("Partie Gagné");
             // dessiner DESSINATEUR A GAGNE
-            context.font = "bold 80px Cambria";
-            context.textAlign = 'center';
-            context.fillStyle = "black";
-            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 - 4 , (dessinBas + dessinHaut) / 2);
-            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 + 4 , (dessinBas + dessinHaut) / 2);
-            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2 - 4);
-            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2 + 4);
-            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 - 4 , (dessinBas + dessinHaut) / 2 - 4);
-            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 - 4, (dessinBas + dessinHaut) / 2 + 4);
-            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 + 4, (dessinBas + dessinHaut) / 2 - 4);
-            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 + 4 , (dessinBas + dessinHaut) / 2 + 4);
-            context.fillStyle = "gold";
-            context.fillText("Gagné", (dessinDroite + dessinGauche) / 2 , (dessinBas + dessinHaut) / 2);
-            typeDeJoueur = "Terminé";
-            context.restore();
+            socket.emit("Gagne");
+            socket.emit("Point", "Gagné");
+            dessineGagne();
           }
         }
       }
@@ -1416,27 +1494,93 @@ function ecouterClavier() {
 }
 
 function ecouterWebSocket() {
-/*  let exampleSocket = new WebSocket("ws://localhost:9000");
+//  let exampleSocket = new WebSocket("ws://localhost:9000");
 
   socket = io();
-  socket.on('Point', function(point){
-    console.log(event.data);
-    console.log("point", point);
-  }); */
+
+  socket.on("Point", function(point){
+    if (typeDeJoueur === "Observateur") {
+      console.log("point", point);
+      let pointReceive = new Point(point.x, point.y, point.taille, point.couleur, point.type);
+      dessin.push(pointReceive);
+      console.log("pointReceive", pointReceive);
+      if (!etatRejouer) {
+        pointReceive.dessine(contextLigneReception);
+      }
+    }
+  });
+  socket.on("Mot", function(mot){
+    motATrouver = mot.toUpperCase();
+    console.log("Mot = " + mot);
+    if (typeDeJoueur === "Dessinateur") {
+      dessineChampMotATrouver();
+    }
+    reinitDessin();
+    demarrerCompteurTemps();
+  });
+
+  socket.on("Gagne", function(score){
+    console.log("score = " + score);
+    scoreGagne = score;
+    console.log("scoreGagne = " + scoreGagne);
+    arreterCompteurTemps();
+    dessineGagne();
+    dessineAutour();
+    AttenteMancheSuivante();
+  });
+
+  socket.on("Perdu", function(score){
+    console.log("score = " + score)
+    console.log("scorePerdu = " + scorePerdu);
+    scorePerdu = score;
+    arreterCompteurTemps();
+    dessinePerdu();
+    dessineAutour();
+    AttenteMancheSuivante();
+  });
+
+  socket.on("InitCompteurTemps", function(score){
+    demarrerCompteurTemps();
+  });
+
+  socket.on("InverserActeur", function(score){
+    if (typeDeJoueur === "Dessinateur") {
+      typeDeJoueur = "Observateur";
+    } else
+    if (typeDeJoueur === "Observateur") {
+      typeDeJoueur = "Dessinateur";
+    }
+    dessinePlateau();
+    socket.emit("InitCompteurTemps");
+    demarrerCompteurTemps();
+    socket.emit("Mot");
+    etatManche = "enCours"
+  });
+
 }
 
+function AttenteMancheSuivante() {
+  clearInterval(intervalTemps);
+  intervalTemps = setInterval(function() {
+    if (typeDeJoueur === "Dessinateur") {
+      socket.emit("InverserActeur");
+      clearInterval(intervalTemps);
+    }
+  }, 5000);
+
+}
 
 function getMousePos(canvas, evt) {
    return {
-      x: evt.originalEvent.offsetX,
-      y: evt.originalEvent.offsetY
+      x: evt.originalEvent.offsetX + (taillePointCrayon / 2),
+      y: evt.originalEvent.offsetY + 32+ (taillePointCrayon / 2)
    };
 }
 
 function rejouerDessin() {
   dessinePlancheADessin("white");
   i = 0;
-  document.body.style.cursor='progress';
+  document.body.style.cursor="progress";
   redessineDessin();
 }
 
@@ -1448,6 +1592,7 @@ function reinitDessin() {
 
 function redessineDessin() {
   if (i < dessin.length) {
+    etatRejouer = true;
     let dessinPoint = {
       x: 0,
       y: 0,
@@ -1462,12 +1607,21 @@ function redessineDessin() {
     //dessineLigne(dessinPoint.x, dessinPoint.y, dessinPoint.taille, dessinPoint.couleur, dessinPoint.type);
     varTimeOut = setTimeout(redessineDessin, 0);
   } else {
-    document.body.style.cursor='pointer';
+    etatRejouer = false;
+    if (typeDeJoueur === "Dessinateur") {
+      document.body.style.cursor="url(./images/crayon_256x256.png), auto";
+    } else {
+      document.body.style.cursor="url(./images/Viseur.png), auto";
+    }
   }
 }
 
 
 function envoiPoint(Point) {
   dessin.push(Point);
-/*  socket.emit('Point', Point); */
+  if (typeDeJoueur === "Dessinateur") {
+    socket.emit("Point", Point);
+  }
+//  socket.emit("Point", { point: [ savePoint ] });
+/*  socket.emit("Point", Point); */
 }

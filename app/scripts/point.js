@@ -44,36 +44,36 @@ class Point {
   dessineLaLigne(context) {
     switch (this.type) {
       case "demarre" :
-        this.demarreLaLigne();
+        this.demarreLaLigne(context);
         break;
       case "continu" :
-        this.continuLaLigne();
+        this.continuLaLigne(context);
         break;
       case "fini" :
-        this.finiLaLigne();
+        this.finiLaLigne(context);
         break;
     }
   }
 
-  demarreLaLigne() {
-    contextLigne.beginPath();
-    contextLigne.lineWidth   = this.taille;
-    contextLigne.strokeStyle = this.couleur;
-    contextLigne.moveTo (this.x, this.y);
-    contextLigne.lineTo(this.x, this.y);
-    contextLigne.stroke();
+  demarreLaLigne(context) {
+    context.beginPath();
+    context.lineWidth   = this.taille;
+    context.strokeStyle = this.couleur;
+    context.moveTo (this.x, this.y);
+    context.lineTo(this.x, this.y);
+    context.stroke();
   }
 
-  continuLaLigne() {
-    contextLigne.lineWidth   = this.taille;
-    contextLigne.strokeStyle = this.couleur;
-    contextLigne.lineTo(this.x, this.y);
-    contextLigne.stroke();
+  continuLaLigne(context) {
+    context.lineWidth   = this.taille;
+    context.strokeStyle = this.couleur;
+    context.lineTo(this.x, this.y);
+    context.stroke();
   }
 
-  finiLaLigne() {
-    contextLigne.closePath();
-    contextLigne.restore();
+  finiLaLigne(context) {
+    context.closePath();
+    context.restore();
   }
 
 }
