@@ -757,7 +757,6 @@ function dessineBoutonVert(colorBorder) {
 
 
 function dessineBoutonActeur(couleurBord) {
-
   if (!couleurBord) {
     couleurBord = "black";
   }
@@ -783,18 +782,15 @@ function dessineBoutonActeur(couleurBord) {
   context.fillText(typeDeJoueur, (boutonActeurGauche + boutonActeurDroite) / 2, (boutonActeurHaut + boutonActeurBas) / 2);
 
   context.restore();
-  if (typeDeJoueur === "Dessinateur") {
-    document.body.style.cursor="url(./images/crayon_256x256.png), auto";
+/*  if (typeDeJoueur === "Dessinateur") {
+    document.body.style.cursor="url(./images/crayon_64x64.png), auto";
   } else {
-    document.body.style.cursor="url(./images/Viseur.png), auto";
-  }
-
+    document.body.style.cursor="url(./images/Viseur_64x64.png), auto";
+  }*/
 }
 
 function dessineBoutonRejouer(couleurBord) {
-
   if (typeDeJoueur === "Observateur") {
-
     color               = couleurFond;
     boutonRejouerGauche = canvas.width - espaceDroite;
     boutonRejouerDroite = boutonRejouerGauche + espaceDroite;
@@ -833,9 +829,7 @@ function dessineBoutonRejouer(couleurBord) {
 }
 
 function dessineBoutonReinit(couleurBord) {
-
   if (typeDeJoueur === "Dessinateur") {
-
     color              = couleurFond;
     boutonReinitGauche = canvas.width - espaceDroite;
     boutonReinitDroite = boutonReinitGauche + espaceDroite;
@@ -848,7 +842,6 @@ function dessineBoutonReinit(couleurBord) {
                             color,
                             color,
                             3);
-
     if (!couleurBord) {
       couleurBord = "black";
     }
@@ -874,9 +867,7 @@ function dessineBoutonReinit(couleurBord) {
 }
 
 function dessinerTempsRestant() {
-
   color       = "Gainsboro";
-
   let tempsRestantGauche = canvas.width - espaceDroite + 10;
   let tempsRestantDroite = canvas.width - 10;
   let tempsRestantHaut   = espaceHaut + 210;
@@ -913,11 +904,9 @@ function viderReponse() {
                           couleurFond,
                           4);
   context.restore();
-
 }
 
 function dessineChampReponse(couleurBord) {
-
   if (!couleurBord) {
     couleurBord = "black";
   }
@@ -946,11 +935,9 @@ function dessineChampReponse(couleurBord) {
 }
 
 function dessineChampMotATrouver(couleurBord) {
-
   if (!couleurBord) {
     couleurBord = "black";
   }
-
   color              = "Gainsboro";
   champReponseGauche = espaceGauche - (espaceGauche / 2) - 25;
   champReponseDroite = canvas.width - (espaceDroite / 2) + 25;
@@ -979,11 +966,9 @@ function dessineChampMotATrouver(couleurBord) {
 }
 
 function dessineTempsRestant(couleurBord) {
-
   if (!couleurBord) {
     couleurBord = "black";
   }
-
   color              = "Gainsboro";
   boutonReinitGauche = canvas.width - espaceDroite;
   boutonReinitDroite = boutonRejouerGauche + espaceDroite;
@@ -1009,21 +994,14 @@ function dessineTempsRestant(couleurBord) {
 
 
 function dessineUnRectanglePlein(x, y, width, height, fillStyle, couleurBord, tailleBordure) {
-
   let dessineCouleurBordure = couleurBord;
-
-  let dessineTailleBordure = tailleBordure;
-
+  let dessineTailleBordure  = tailleBordure;
   if (tailleBordure > 0) {
     context.fillStyle = couleurBord;
     context.fillRect( x - tailleBordure, y - tailleBordure, width + (tailleBordure * 2), height + (tailleBordure * 2) );
   }
-
   context.fillStyle = fillStyle;
   context.fillRect( x, y, width, height);
-
-//  context.rect( x, y, width, height);
-
   context.restore();
 }
 
@@ -1090,8 +1068,18 @@ function ecouterSouris() {
   });
 
   $(canvas).on("mousemove touchmove", function (evt) { // au survol de la souris
-    console.log("touchmove");
     mousePos = getMousePos(canvas, evt);
+    if ((mousePos.x >= (dessinGauche + taillePointCrayon / 2) && mousePos.x <= (dessinDroite - taillePointCrayon / 2))
+     && (mousePos.y >= (dessinHaut + taillePointCrayon / 2)   && mousePos.y <= (dessinBas - taillePointCrayon / 2) )) {
+    if (typeDeJoueur === "Dessinateur") {
+      document.body.style.cursor="url(./images/crayon_64x64.png), auto";
+    } else {
+      document.body.style.cursor="url(./images/Viseur_64x64.png), auto";
+     }
+   } else
+   if (typeDeJoueur === "Dessinateur") {
+     document.body.style.cursor="url(./images/Fleche_64x64.png), auto";
+   }
     if (typeDeJoueur === "Dessinateur") {
       if (ecouteMousemove) {
         if ((mousePos.x >= (dessinGauche + taillePointCrayon / 2) && mousePos.x <= (dessinDroite - taillePointCrayon / 2))
@@ -1103,7 +1091,6 @@ function ecouterSouris() {
            } else {
              colorCrayon = couleurCrayon;
            }
-
         // dessineUnRectanglePlein(mousePos.x - (taillePointCrayon / 2), mousePos.y - (taillePointCrayon / 2), taillePointCrayon, taillePointCrayon, colorCrayon, "", 0);
            let dessinPoint = {
              x: 0,
@@ -1201,7 +1188,6 @@ function ecouterSouris() {
 });
 
   $(canvas).on("mousedown touchend", function (evt) { // au click de la souris
-    console.log("touchend");
 
     mousePos = getMousePos(canvas, evt);
     if (typeDeJoueur === "Dessinateur") {
@@ -1210,8 +1196,7 @@ function ecouterSouris() {
         if ((mousePos.x >= (dessinGauche + taillePointCrayon / 2) && mousePos.x <= (dessinDroite - taillePointCrayon / 2))
          && (mousePos.y >= (dessinHaut + taillePointCrayon / 2)   && mousePos.y <= (dessinBas - taillePointCrayon / 2) )) {
            let colorCrayon
-           if(evt.which == 3) {
-             console.log("Bouton droite enfoncé");
+           if(evt.which == 3) { // Bouton droite enfoncé
              colorCrayon = "white";
            } else {
              colorCrayon = couleurCrayon;
@@ -1263,8 +1248,7 @@ function ecouterSouris() {
       if ((mousePos.x >= (dessinGauche + taillePointCrayon / 2) && mousePos.x <= (dessinDroite - taillePointCrayon / 2))
        && (mousePos.y >= (dessinHaut + taillePointCrayon / 2)   && mousePos.y <= (dessinBas - taillePointCrayon / 2) )) {
          let colorCrayon = couleurCrayon;
-         if(evt.which == 3) {
-           console.log("Bouton droite enfoncé");
+         if(evt.which == 3) { // Bouton droite enfoncé
            let colorCrayon = "white";
          } else {
            let colorCrayon = couleurCrayon;
@@ -1386,7 +1370,6 @@ function ecouterSouris() {
        } else {
          typeDeJoueur = "Dessinateur";
        }
-
        dessinerInterfaceActeur();
     }
   });
@@ -1481,8 +1464,7 @@ function ecouterClavier() {
           console.log(motATrouver.toUpperCase());
           if (reponse == motATrouver.toUpperCase()) {
             arreterCompteurTemps();
-            console.log("Partie Gagné");
-            // dessiner DESSINATEUR A GAGNE
+            // dessiner GAGNE
             socket.emit("Gagne");
             socket.emit("Point", "Gagné");
             dessineGagne();
@@ -1500,10 +1482,8 @@ function ecouterWebSocket() {
 
   socket.on("Point", function(point){
     if (typeDeJoueur === "Observateur") {
-      console.log("point", point);
       let pointReceive = new Point(point.x, point.y, point.taille, point.couleur, point.type);
       dessin.push(pointReceive);
-      console.log("pointReceive", pointReceive);
       if (!etatRejouer) {
         pointReceive.dessine(contextLigneReception);
       }
@@ -1511,7 +1491,6 @@ function ecouterWebSocket() {
   });
   socket.on("Mot", function(mot){
     motATrouver = mot.toUpperCase();
-    console.log("Mot = " + mot);
     if (typeDeJoueur === "Dessinateur") {
       dessineChampMotATrouver();
     }
@@ -1520,9 +1499,7 @@ function ecouterWebSocket() {
   });
 
   socket.on("Gagne", function(score){
-    console.log("score = " + score);
     scoreGagne = score;
-    console.log("scoreGagne = " + scoreGagne);
     arreterCompteurTemps();
     dessineGagne();
     dessineAutour();
@@ -1530,8 +1507,6 @@ function ecouterWebSocket() {
   });
 
   socket.on("Perdu", function(score){
-    console.log("score = " + score)
-    console.log("scorePerdu = " + scorePerdu);
     scorePerdu = score;
     arreterCompteurTemps();
     dessinePerdu();
@@ -1571,9 +1546,10 @@ function AttenteMancheSuivante() {
 }
 
 function getMousePos(canvas, evt) {
+  let tailleIcone = 64; // icones de 64 pixels
    return {
-      x: evt.originalEvent.offsetX + (taillePointCrayon / 2),
-      y: evt.originalEvent.offsetY + 32+ (taillePointCrayon / 2)
+      x: evt.originalEvent.offsetX + (tailleIcone / 2) + (taillePointCrayon / 2),
+      y: evt.originalEvent.offsetY + (tailleIcone / 2) + (taillePointCrayon / 2)
    };
 }
 
@@ -1608,11 +1584,11 @@ function redessineDessin() {
     varTimeOut = setTimeout(redessineDessin, 0);
   } else {
     etatRejouer = false;
-    if (typeDeJoueur === "Dessinateur") {
-      document.body.style.cursor="url(./images/crayon_256x256.png), auto";
+/*    if (typeDeJoueur === "Dessinateur") {
+      document.body.style.cursor="url(./images/crayon_64x64.png), auto";
     } else {
-      document.body.style.cursor="url(./images/Viseur.png), auto";
-    }
+      document.body.style.cursor="url(./images/Viseur_64x64.png), auto";
+    }*/
   }
 }
 
